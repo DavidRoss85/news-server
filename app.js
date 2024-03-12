@@ -5,10 +5,10 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 require('dotenv').config();
 
-const indexRouter = require('./routes/index');
-const newsRouter = require('./routes/news');
-const userRouter = require('./routes/users');
-const loginRouter = require('./routes/login')
+const indexRouter = require('./routes/indexRouter');
+const newsRouter = require('./routes/newsRouter');
+const userRouter = require('./routes/userRouter');
+const loginRouter = require('./routes/loginRouter')
 
 
 const app = express();
