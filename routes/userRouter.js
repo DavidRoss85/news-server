@@ -1,6 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
-const DEFAULTS = require('../public/javascripts/DEFAULTS')
+const DEFAULTS = require('../public/javascripts/DEFAULTS');
+const dbHanlder = require('../public/javascripts/dbHandler')
 
 userRouter.use(express.json());
 userRouter.route('/')
@@ -24,6 +25,25 @@ userRouter.route('/')
             res.statusCode = 403;
             res.json({ status: 'error' });
         }
+    });
+//testing:
+userRouter.route('/test')
+    .get((req, res) => {
+        dbHanlder.testFind();
+        res.end('Test find')
     })
+    .post((req,res)=>{
+        dbHanlder.testCreate()
+        res.end('Test create')
+    })
+    .put((req,res)=>{
+        dbHanlder.testEdit('user')
+        res.end('Test edit')
+    })
+    .delete((req,res)=>{
+        dbHanlder.testDelete('user')
+        res.end('Test edit')
+    })
+
 
 module.exports = userRouter;
