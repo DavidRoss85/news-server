@@ -8,6 +8,8 @@ require('dotenv').config();
 const indexRouter = require('./routes/index');
 const newsRouter = require('./routes/news');
 const userRouter = require('./routes/users');
+const loginRouter = require('./routes/login')
+
 
 const app = express();
 
@@ -21,10 +23,21 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use((req, res, next) => {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json')
+    res.appendHeader('Access-Control-Allow-Origin', '*');
+    res.appendHeader('Access-Control-Allow-Credentials', 'true');
+    res.appendHeader('Access-Control-Allow-Methods', '*');
+    res.appendHeader('Access-Control-Allow-Headers', '*')
+    next();
+});
+
 //Routers:
 app.use('/', indexRouter);
 app.use('/news', newsRouter);
 app.use('/user', userRouter);
+app.use('/login',loginRouter);
 
 
 // catch 404 and forward to error handler
@@ -43,5 +56,5 @@ app.use((err, req, res, next) => {
   res.render('error');
 });
 
-exports.newsFeedServer = app;
-module.exports = app;
+module.exports.newsFeedServer = app;
+// module.exports = app;
