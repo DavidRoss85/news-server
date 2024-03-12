@@ -44,3 +44,4 @@ app.use((err, req, res, next) => {
 });
 
 exports.newsFeedServer = app;
+module.exports = app;
