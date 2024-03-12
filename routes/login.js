@@ -19,11 +19,11 @@ loginRouter.route('/')
     //     next();
     // })
     .post((req, res) => {
-        console.log('Recieved login request: ', req.body);
+        console.log('\n***\nRecieved login request: ', req.body);
 
         //Replace this code with REAL login code
         if (req.body.username && req.body.password === testUser.password) {
-            res.json(testUser);
+            res.json({...testUser, password: 'is good!'});
             return;
         }
         res.json({ validated: false });

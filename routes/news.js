@@ -17,7 +17,7 @@ newsRouter.route('/')
     // })
     .post(async (req, res) => {
 
-        console.log('Recieved a post request', JSON.stringify(req.body));
+        console.log('\n***\nRecieved a post request', JSON.stringify(req.body));
 
         if (req.body.request === 'search' && !!req.body.data) {
 
