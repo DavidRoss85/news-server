@@ -1,7 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
 const DEFAULTS = require('../public/javascripts/DEFAULTS');
-const dbHanlder = require('../public/javascripts/dbHandler')
+const dbHandler = require('../public/javascripts/userSettingsDbHandler')
 
 userRouter.use(express.json());
 userRouter.route('/')
@@ -26,22 +26,21 @@ userRouter.route('/')
             res.json({ status: 'error' });
         }
     });
-//testing:
 userRouter.route('/test')
-    .get((req, res) => {
-        dbHanlder.testFind();
-        res.end('Test find')
+    .get(async (req, res) => {
+        const data = await  dbHandler.testFind();
+        res.json(data)
     })
-    .post((req,res)=>{
-        dbHanlder.testCreate()
+    .post(async (req,res)=>{
+        dbHandler.testCreate(DEFAULTS.DEFAULT_USER_SETTINGS)
         res.end('Test create')
     })
-    .put((req,res)=>{
-        dbHanlder.testEdit('user')
+    .put(async (req,res)=>{
+        dbHandler.testEdit('defaultUser')
         res.end('Test edit')
     })
-    .delete((req,res)=>{
-        dbHanlder.testDelete('user')
+    .delete(async (req,res)=>{
+        dbHandler.testDelete('defaultUser')
         res.end('Test edit')
     })
 

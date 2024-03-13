@@ -6,7 +6,6 @@ const homepageSchema = new Schema(
         id: {
             type: Number,
             required: true,
-            unique: true,
         },
         search: Schema.Types.Mixed,
         numArticles: Number,
@@ -43,6 +42,7 @@ const userSchema = new Schema(
         displayname: {
             type: String,
             required: true,
+            default:'Welcome'
         },
         avatar: {
             type: String,
@@ -55,3 +55,4 @@ const userSchema = new Schema(
 );
 
 const UserSetting = mongoose.model('UserSetting', userSchema);
+module.exports = UserSetting;

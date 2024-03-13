@@ -1,5 +1,6 @@
 const express = require('express');
 const loginRouter = express.Router();
+const dbHandler= require('../public/javascripts/userDbHandler');
 //For testing purposes
 testUser = {
     validated: true,
@@ -27,6 +28,24 @@ loginRouter.route('/')
             return;
         }
         res.json({ validated: false });
+    })
+//testing:
+loginRouter.route('/test')
+    .get((req, res) => {
+        dbHandler.testFind();
+        res.end('Test find')
+    })
+    .post((req,res)=>{
+        dbHandler.testCreate()
+        res.end('Test create')
+    })
+    .put((req,res)=>{
+        dbHandler.testEdit('user')
+        res.end('Test edit')
+    })
+    .delete((req,res)=>{
+        dbHandler.testDelete('user')
+        res.end('Test edit')
     })
 
 module.exports = loginRouter;

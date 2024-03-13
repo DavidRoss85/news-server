@@ -172,3 +172,126 @@ module.exports.TEST_USER_SETTINGS = {
     }
 };
 
+module.exports.DEFAULT_USER_SETTINGS = {
+    "username": "defaultUser",
+    "avatar": "",
+    "preferences": {
+      "region": "",
+      "homepage": [
+        {
+          "id": 0,
+          "search": {
+            "category": "",
+            "country": "all",
+            "endpoint": "top-headlines",
+            "errorMode": false,
+            "keyword": ""
+          },
+          "numArticles": 10,
+          "title": "Top-Stories",
+          "tileType": "slide",
+          "row": 1,
+          "sizing": {
+            "md": "5",
+            "className": ""
+          },
+          "innerSizing": {
+            "className": "slideHolder"
+          },
+          "componentAttribute": {}
+        },
+        {
+          "id": 1,
+          "search": {
+            "category": "entertainment",
+            "country": "all",
+            "endpoint": "top-headlines",
+            "errorMode": false,
+            "keyword": ""
+          },
+          "numArticles": 6,
+          "title": "Entertainment",
+          "tileType": "pallette",
+          "row": 1,
+          "sizing": {
+            "md": "4",
+            "className": ""
+          },
+          "innerSizing": {
+            "className": ""
+          },
+          "componentAttribute": {
+            "md": "6"
+          }
+        },
+        {
+          "id": 2,
+          "search": {
+            "category": "",
+            "country": "all",
+            "endpoint": "top-headlines",
+            "errorMode": false,
+            "keyword": ""
+          },
+          "numArticles": 8,
+          "title": "News",
+          "tileType": "list",
+          "row": 1,
+          "sizing": {
+            "md": "3",
+            "className": ""
+          },
+          "innerSizing": {
+            "className": ""
+          },
+          "componentAttribute": {}
+        },
+        {
+          "id": 3,
+          "search": {
+            "category": "",
+            "country": "all",
+            "endpoint": "top-headlines",
+            "errorMode": false,
+            "keyword": "Artificial Intelligence"
+          },
+          "numArticles": 6,
+          "title": "AI News",
+          "tileType": "topic",
+          "row": 2,
+          "sizing": {
+            "md": "6",
+            "className": ""
+          },
+          "innerSizing": {
+            "className": ""
+          },
+          "componentAttribute": {}
+        },
+        {
+          "id": 4,
+          "search": {
+            "category": "business",
+            "country": "all",
+            "endpoint": "top-headlines",
+            "errorMode": false,
+            "keyword": ""
+          },
+          "numArticles": 32,
+          "title": "Business",
+          "tileType": "pallette",
+          "row": 2,
+          "sizing": {
+            "md": "6",
+            "className": ""
+          },
+          "innerSizing": {
+            "className": ""
+          },
+          "componentAttribute": {
+            "md": "3"
+          }
+        }
+      ]
+    }
+  }
