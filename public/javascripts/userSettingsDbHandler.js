@@ -16,7 +16,7 @@ exports.testConnection = async () => {
     await mongoose.connection.close();
 };
 
-exports.testCreate = async (settingsInfo) => {
+exports.addSettings = async (settingsInfo) => {
     await mongoose.connect(url);
     try {
         await UserSetting.create(settingsInfo);

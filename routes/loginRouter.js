@@ -1,6 +1,7 @@
 const express = require('express');
 const loginRouter = express.Router();
-const dbHandler= require('../public/javascripts/userDbHandler');
+const dbHandler = require('../public/javascripts/userDbHandler');
+const { db } = require('../public/javascripts/dbModels/userSettingModel');
 //For testing purposes
 testUser = {
     validated: true,
@@ -10,42 +11,48 @@ testUser = {
 
 loginRouter.use(express.json());
 loginRouter.route('/')
-    // .all((req, res, next) => {
-    //     res.statusCode = 200;
-    //     res.setHeader('Content-Type', 'application/json')
-    //     res.appendHeader('Access-Control-Allow-Origin', '*');
-    //     res.appendHeader('Access-Control-Allow-Credentials', 'true');
-    //     res.appendHeader('Access-Control-Allow-Methods', '*');
-    //     res.appendHeader('Access-Control-Allow-Headers', '*')
-    //     next();
-    // })
-    .post((req, res) => {
-        console.log('\n***\nRecieved login request: ', req.body);
-
+    .post(async (req, res) => {
+        const userInfo = req.body.data;
+        console.log('\n***\nRecieved login request: ', userInfo);
         //Replace this code with REAL login code
-        if (req.body.username && req.body.password === testUser.password) {
-            res.json({...testUser, password: 'is good!'});
+        const data = await dbHandler.validateUser(userInfo);
+        if (data.result === 'success') {
+            res.statusCode = 200;
+            res.json(data);
             return;
         }
-        res.json({ validated: false });
+        res.statusCode = 403;
+        res.json(data);
     })
-//testing:
-loginRouter.route('/test')
-    .get((req, res) => {
-        dbHandler.testFind();
-        res.end('Test find')
+
+loginRouter.route('/admin')
+    .get(async (req, res) => {
+        const data = await dbHandler.findAll();
+        res.json(data);
     })
-    .post((req,res)=>{
-        dbHandler.testCreate()
-        res.end('Test create')
+    .post(async (req, res) => {
+        const userInfo = req.body.data
+        const data = await dbHandler.createNewUser(userInfo)
+        res.json(data)
     })
-    .put((req,res)=>{
-        dbHandler.testEdit('user')
-        res.end('Test edit')
+    .put(async (req, res) => {
+        const userInfo = req.body.data;
+        if (req.body.request === 'CHANGE-PASSWORD') {
+            const data = await dbHandler.changePassword(userInfo);
+            res.json(data)
+            return;
+        } else if (req.body.request === 'CHANGE-USERNAME') {
+            const data = await dbHandler.changeUsername(userInfo);
+            res.json(data)
+            return;
+        }
+        res.statusCode = 403;
+        res.json({ result: 'Unknown Request', details: 'Received a put request with improper request header' })
     })
-    .delete((req,res)=>{
-        dbHandler.testDelete('user')
-        res.end('Test edit')
+    .delete(async (req, res) => {
+        const userInfo = req.body.data;
+        const data = await dbHandler.deleteUser(userInfo)
+        res.json(data)
     })
 
 module.exports = loginRouter;

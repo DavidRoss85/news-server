@@ -1,3 +1,4 @@
+const DUPLICATE_USER_MSG = 'MongoServerError: E11000 duplicate key error collection: newsFeedData.users index: username';
 const url = 'mongodb://127.0.0.1:27017/newsFeedData';
 const mongoose = require('mongoose');
 const User = require('./dbModels/userModel');
@@ -11,60 +12,179 @@ mongoose.connection.on('disconnecting', () => console.log('Mongo DB disconnectin
 mongoose.connection.on('close', () => console.log('Mongo DB close'));
 
 
-exports.testConnection = async ()=>{
-    await mongoose.connect(url);
-    await mongoose.connection.close();
+exports.testConnection = async () => {
+    let result = {};
+    try {
+        await mongoose.connect(url);
+        result = { result: 'success', details: 'connection OK' };
+
+    } catch (e) {
+        console.log(e);
+        result = { result: 'error', details: 'Bad connnection: ' + e };
+
+    } finally {
+        await mongoose.connection.close();
+        return result;
+
+    };
+
 };
 
-exports.testCreate = async ()=>{
-    await mongoose.connect(url);
-    try{
+exports.createNewUser = async (userInfo) => {
+    const { username, password } = userInfo;
+    if (!username || !password) return { result: 'error', details: 'must provide user info' };
+
+    //NOT SECURE
+    let result = {};
+    try {
+        await mongoose.connect(url);
         await User.create({
-            username: 'user',
-            password: 'Longpassword'
+            username: username,
+            password: password,
         });
-    }catch(e){
-        console.log('\nError creating new user: ', e)
-    }
+        result = { result: 'success', details: 'created new user ' + username };
 
-    const allUsers = await User.find();
-    console.log('\n***\nHere are your users:\n', allUsers);
+    } catch (e) {
+        console.log('\nError creating new user: ');
+        const errMsg = `${e}`;
+        if (errMsg.startsWith(DUPLICATE_USER_MSG)) {
+            console.log('USER ALREADY EXISTS');
+            result = { result: 'error', details: 'user already exists' }
+        } else {
+            result = { result: 'error', details: errMsg }
+        };
 
-    mongoose.connection.close();
+    } finally {
+        const allUsers = await User.find();
+        console.log('\n***\nHere are your users:\n', allUsers);
+        mongoose.connection.close();
+        return result;
+
+    };
+
 };
 
-exports.testFind = async ()=>{
-    await mongoose.connect(url);
+exports.findAll = async () => {
+    let result = {}
+    try {
+        await mongoose.connect(url);
+        result = await User.find();
+        console.log('\n***\nHere are your users:\n', result);
 
-    const allUsers = await User.find();
-    console.log('\n***\nHere are your users:\n', allUsers);
+    } catch (e) {
+        console.log('Error performing search: ', e);
+        result = { result: 'error', details: e };
 
-    await mongoose.connection.close();
+    } finally {
+        await mongoose.connection.close();
+        return result;
+
+    };
+
 };
 
-exports.testEdit = async (username)=>{
-    await mongoose.connect(url);
+exports.changePassword = async (userInfo) => {
+    const { username, password } = userInfo;
+    if (!username || !password) return { result: 'error', details: 'username or password not specified' };
 
-    try{
-        const currentUser = await User.findOne({username: username});
-        await User.findOneAndUpdate({username: username}, {password: currentUser.password + ' (updated)'});
-    }catch(e){
-        console.log('Error updating document: ', e)
-    }
+    let result = {};
+    try {
+        await mongoose.connect(url);
+        const res = await User.findOneAndUpdate({ username: username }, { password: password });
+        result = res ?
+            { result: 'success', details: 'Password updated' }
+            :
+            { result: 'error', details: 'Could not locate user' };
 
-    const allUsers = await User.find();
-    console.log('\n***\nHere are your updated users:\n', allUsers);
+    } catch (e) {
+        console.log('Error updating password: ', e);
+        result = { result: 'error', details: e };
 
-    await mongoose.connection.close();
+    } finally {
+        const allUsers = await User.find();
+        console.log('\n***\nHere are your updated users:\n', allUsers);
+        await mongoose.connection.close();
+        return result;
+    };
+
 };
 
-exports.testDelete = async (username)=>{
-    await mongoose.connect(url);
+exports.changeUsername = async (userInfo) => {
+    const { username, newUsername } = userInfo;
+    if (!username || !newUsername) return { result: 'error', details: 'user info not specified' };
 
-    await User.findOneAndDelete({username: username});
+    let result = {};
+    try {
+        await mongoose.connect(url);
+        const res = await User.findOneAndUpdate({ username: username }, { username: newUsername });
+        result = res ?
+            { result: 'success', details: 'Password updated' }
+            :
+            { result: 'error', details: 'Could not locate user' };
 
-    const allUsers = await User.find();
-    console.log('\n***\nHere are your updated users:\n', allUsers);
+    } catch (e) {
+        console.log('Error updating username: ', e);
+        result = { result: 'error', details: e };
 
-    await mongoose.connection.close();
+    } finally {
+        const allUsers = await User.find();
+        console.log('\n***\nHere are your updated users:\n', allUsers);
+        await mongoose.connection.close();
+        return result;
+    };
+
 };
+
+exports.deleteUser = async (userInfo) => {
+    const { username } = userInfo;
+    if (!username) return { result: 'error', details: 'user info not specified' };
+    let result = {};
+    try {
+        await mongoose.connect(url);
+        const res = await User.findOneAndDelete({ username: username });
+        result = res ?
+            { result: 'success', details: username + ' deleted' }
+            :
+            { result: 'error', details: 'Could not locate user' };
+
+    } catch (e) {
+        console.log('Error deleting user: ', e);
+        result = { result: 'error', details: e };
+
+    } finally {
+        const allUsers = await User.find();
+        console.log('\n***\nHere are your updated users:\n', allUsers);
+        await mongoose.connection.close();
+        return result;
+    };
+
+};
+
+exports.validateUser = async (userInfo) => {
+    const { username, password } = userInfo;
+    if (!username || !password) return { result: 'error', details: 'user information not specified' };
+    let result = {};
+    try {
+        await mongoose.connect(url);
+        const res = await User.findOne({ username: username });
+        if (res) {
+            console.log(username + 'found');
+            res.password === password ?
+                result = { result: 'success', validated: true, details: username + ' validated' }
+                :
+                result = { result: 'failed', details: 'invalid username or password' }
+        } else {
+            result = { result: 'failed', details: 'invalid username or password' };
+        };
+
+    } catch (e) {
+        console.log('Error locating user: ' + username, e);
+        result = { result: 'failed', details: 'invalid username or password' };
+
+    } finally {
+        await mongoose.connection.close();
+        return result;
+    };
+
+};
+

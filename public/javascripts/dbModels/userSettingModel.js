@@ -6,6 +6,7 @@ const homepageSchema = new Schema(
         id: {
             type: Number,
             required: true,
+            unique: true
         },
         search: Schema.Types.Mixed,
         numArticles: Number,
