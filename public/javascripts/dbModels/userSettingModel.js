@@ -7,18 +7,15 @@ const homepageSchema = new Schema(
             type: Number,
             required: true,
         },
-        search: Schema.Types.Mixed,
-        numArticles: Number,
         title: String,
         tileType: String,
-        row: {
-            type: Number,
-            required: true,
-            default: 1,
-        },
+        row: { type: Number, required: true, default: 1, },
+        numArticles: Number,
         sizing: Schema.Types.Mixed,
         innerSizing: Schema.Types.Mixed,
         componentAttribute: Schema.Types.Mixed,
+        search: Schema.Types.Mixed,
+        style: Schema.Types.Mixed,
     }
 )
 
@@ -42,7 +39,7 @@ const userSchema = new Schema(
         displayname: {
             type: String,
             required: true,
-            default:'Welcome'
+            default: 'Welcome'
         },
         avatar: {
             type: String,
