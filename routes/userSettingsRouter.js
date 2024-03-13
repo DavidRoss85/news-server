@@ -12,10 +12,10 @@ userRouter.route('/')
         if (req.body.request === 'GET-SETTINGS') {
             const data = await dbHandler.getSettings(userInfo);
             if (data.result === 'success') {
-                res.json(data.data);
+                res.json(data);
             } else {
                 res.statusCode = 404;
-                res.json(data.data);
+                res.json(data);
             }
         } else {
             res.statusCode = 403;
@@ -28,10 +28,10 @@ userRouter.route('/')
         if (req.body.request === 'UPDATE-SETTINGS') {
             const data = await dbHandler.updateSettings(settingsInfo);
             if (data.result === 'success') {
-                res.json(data.data);
+                res.json(data);
             } else {
                 res.statusCode = 500;
-                res.json(data.data);
+                res.json(data);
             }
         } else {
             res.statusCode = 403;

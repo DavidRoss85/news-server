@@ -90,7 +90,7 @@ exports.changePassword = async (userInfo) => {
     let result = {};
     try {
         await mongoose.connect(url);
-        const res = await User.findOneAndUpdate({ username: username }, { password: password });
+        const res = await User.findOneAndUpdate({ username: username }, { password: password },{new:true});
         result = res ?
             { result: 'success', details: 'Password updated' }
             :
@@ -116,7 +116,7 @@ exports.changeUsername = async (userInfo) => {
     let result = {};
     try {
         await mongoose.connect(url);
-        const res = await User.findOneAndUpdate({ username: username }, { username: newUsername });
+        const res = await User.findOneAndUpdate({ username: username }, { username: newUsername },{new:true});
         result = res ?
             { result: 'success', details: 'Password updated' }
             :

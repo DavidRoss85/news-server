@@ -107,7 +107,7 @@ exports.createNewSettings = async (settingsInfo) => {
         await mongoose.connect(url);
         const res = await UserSetting.create(settingsInfo);
         result = { result: 'success', data: res, details: 'created new user settings for ' + username };
-
+    
     } catch (e) {
         console.log('\nError creating new user settings: ');
         const errMsg = `${e}`;
@@ -135,7 +135,8 @@ exports.updateSettings = async (settingsInfo) => {
     let result = {};
     try {
         await mongoose.connect(url);
-        const res = await UserSetting.findOneAndUpdate({ username: username }, { ...settingsInfo });
+        const res = await UserSetting.findOneAndUpdate({ username: username }, { ...settingsInfo },{new: true});
+        console.log('\n\n\n\n\**************Update res: ', res);
         result = res ?
             { result: 'success', data: res, details: 'Settings updated' }
             :
