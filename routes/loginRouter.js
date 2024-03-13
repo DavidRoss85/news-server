@@ -1,6 +1,6 @@
 const express = require('express');
 const loginRouter = express.Router();
-const dbHandler = require('../public/javascripts/userDbHandler');
+const dbHandler = require('../public/javascripts/loginDbHandler');
 const { db } = require('../public/javascripts/dbModels/userSettingModel');
 //For testing purposes
 testUser = {

@@ -7,12 +7,12 @@ require('dotenv').config();
 
 const indexRouter = require('./routes/indexRouter');
 const newsRouter = require('./routes/newsRouter');
-const userRouter = require('./routes/userRouter');
+const userRouter = require('./routes/userSettingsRouter');
 const loginRouter = require('./routes/loginRouter')
 
 
 const app = express();
-
+console.log('\n\n************\n************\nBEGIN SERVER\n************')
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

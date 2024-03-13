@@ -145,7 +145,7 @@ exports.deleteUser = async (userInfo) => {
         result = res ?
             { result: 'success', details: username + ' deleted' }
             :
-            { result: 'error', details: 'Could not locate user' };
+            { result: 'error', details: 'Could not locate user'+ username };
 
     } catch (e) {
         console.log('Error deleting user: ', e);
@@ -170,7 +170,7 @@ exports.validateUser = async (userInfo) => {
         if (res) {
             console.log(username + 'found');
             res.password === password ?
-                result = { result: 'success', validated: true, details: username + ' validated' }
+                result = { result: 'success', validated: true, details: username + ' validated', username }
                 :
                 result = { result: 'failed', details: 'invalid username or password' }
         } else {
