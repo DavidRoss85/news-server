@@ -1,7 +1,7 @@
 const express = require('express');
 const loginRouter = express.Router();
-const dbHandler = require('../public/javascripts/loginDbHandler');
-const { db } = require('../public/javascripts/dbModels/userSettingModel');
+const dbHandler = require('../public/javascripts/db/loginDbHandler');
+const { db } = require('../public/javascripts/db/dbModels/userSettingModel');
 //For testing purposes
 testUser = {
     validated: true,
@@ -21,8 +21,9 @@ loginRouter.route('/')
             res.json(data);
             return;
         }
-        res.statusCode = 403;
-        res.json(data);
+        res.statusCode = data.server.code;
+        const {details, ...rest} = data;
+        res.json(rest);
     })
 
 loginRouter.route('/admin')

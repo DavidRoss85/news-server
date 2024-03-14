@@ -1,8 +1,9 @@
 const DUPLICATE_USER_MSG = 'MongoServerError: E11000 duplicate key error collection: newsFeedData.users index: username';
 const url = 'mongodb://127.0.0.1:27017/newsFeedData';
-const DEFAULTS = require('./DEFAULTS');
+const DEFAULTS = require('../DEFAULTS');
 const mongoose = require('mongoose');
 const UserSetting = require('./dbModels/userSettingModel');
+const handleError = require('../handleError');
 let connected = false;
 //Event handlers:
 mongoose.connection.on('connected', () => { connected = true; console.log('MongoDB connected') });
@@ -76,6 +77,16 @@ exports.getSettings = async (userInfo) => {
     const { username } = userInfo;
     if (!username) return { result: 'error', details: 'user information not specified' };
     let result = {};
+    const server = {
+        code: 404,
+        category: 'Failed',
+        message: 'Could not find user settings in database',
+    }
+    // const sleep = async (ms) => {
+    //     return new Promise((resolve) => { setTimeout(resolve, ms) })
+    // }
+    // await sleep(10000);
+
     try {
         await mongoose.connect(url);
         const res = await UserSetting.findOne({ username: username });
@@ -83,12 +94,13 @@ exports.getSettings = async (userInfo) => {
             console.log(username + 'found');
             result = { result: 'success', data: res, details: username + ' validated' }
         } else {
-            result = { result: 'error', data: DEFAULTS.DEFAULT_USER_SETTINGS, details: 'user not located' };
+            result = { result: 'error', data: DEFAULTS.DEFAULT_USER_SETTINGS, details: 'user not located', server:{...server} };
         };
 
     } catch (e) {
         console.log('Error locating user: ' + username, e);
-        result = { result: 'error', data: DEFAULTS.DEFAULT_USER_SETTINGS, details: e };
+        result = handleError(e);
+        // result = { result: 'error', data: DEFAULTS.DEFAULT_USER_SETTINGS, details: e };
 
     } finally {
         await mongoose.connection.close();

@@ -1,7 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
 const DEFAULTS = require('../public/javascripts/DEFAULTS');
-const dbHandler = require('../public/javascripts/userSettingsDbHandler')
+const dbHandler = require('../public/javascripts/db/userSettingsDbHandler')
 
 userRouter.use(express.json());
 userRouter.route('/')
@@ -14,8 +14,9 @@ userRouter.route('/')
             if (data.result === 'success') {
                 res.json(data);
             } else {
-                res.statusCode = 404;
-                res.json(data);
+                const {details, ...rest} = data;
+                res.statusCode = data.server.code;
+                res.json(rest);
             }
         } else {
             res.statusCode = 403;
@@ -53,23 +54,23 @@ userRouter.route('/')
 
 
 //testing    
-userRouter.route('/test')
-    .get(async (req, res) => {
-        const data = await dbHandler.testFind();
-        res.json(data)
-    })
-    .post(async (req, res) => {
-        dbHandler.testCreate(DEFAULTS.DEFAULT_USER_SETTINGS)
-        res.end('Test create')
-    })
-    .put(async (req, res) => {
-        dbHandler.testEdit('defaultUser')
-        res.end('Test edit')
-    })
-    .delete(async (req, res) => {
-        dbHandler.testDelete('defaultUser')
-        res.end('Test edit')
-    })
+// userRouter.route('/test')
+//     .get(async (req, res) => {
+//         const data = await dbHandler.testFind();
+//         res.json(data)
+//     })
+//     .post(async (req, res) => {
+//         dbHandler.testCreate(DEFAULTS.DEFAULT_USER_SETTINGS)
+//         res.end('Test create')
+//     })
+//     .put(async (req, res) => {
+//         dbHandler.testEdit('defaultUser')
+//         res.end('Test edit')
+//     })
+//     .delete(async (req, res) => {
+//         dbHandler.testDelete('defaultUser')
+//         res.end('Test edit')
+//     })
 
 
 module.exports = userRouter;

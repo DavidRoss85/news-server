@@ -2,6 +2,7 @@ const DUPLICATE_USER_MSG = 'MongoServerError: E11000 duplicate key error collect
 const url = 'mongodb://127.0.0.1:27017/newsFeedData';
 const mongoose = require('mongoose');
 const User = require('./dbModels/userModel');
+const handleError = require('../handleError')
 
 //Event handlers:
 mongoose.connection.on('connected', () => console.log('MongoDB connected'));
@@ -10,6 +11,13 @@ mongoose.connection.on('disconnected', () => console.log('Mongo DB disconnected'
 mongoose.connection.on('reconnected', () => console.log('Mongo DB reconnected'));
 mongoose.connection.on('disconnecting', () => console.log('Mongo DB disconnecting'));
 mongoose.connection.on('close', () => console.log('Mongo DB close'));
+mongoose.connection.on('error',(e)=>{
+    // console.log('\n\n>>>>>>>>>>>>>>\nTest Error:\nreason:',e.reason);
+    // console.log('name:', e.name);
+    // console.log('caller',e.caller)
+    // console.log('>>>>>>>>>>>>>>>\n\n\n\n')
+
+})
 
 
 exports.testConnection = async () => {
@@ -94,7 +102,10 @@ exports.changePassword = async (userInfo) => {
         result = res ?
             { result: 'success', details: 'Password updated' }
             :
-            { result: 'error', details: 'Could not locate user' };
+            (()=>{
+                console.log('User not found in database')
+                return{ result: 'error', details: 'Unable to update password' };
+            })();
 
     } catch (e) {
         console.log('Error updating password: ', e);
@@ -164,6 +175,12 @@ exports.validateUser = async (userInfo) => {
     const { username, password } = userInfo;
     if (!username || !password) return { result: 'error', details: 'user information not specified' };
     let result = {};
+    //default server fail code:
+    const server = {
+        code: 403,
+        category: 'Failed',
+        message: 'Invalid username or password',
+    }
     try {
         await mongoose.connect(url);
         const res = await User.findOne({ username: username });
@@ -172,14 +189,15 @@ exports.validateUser = async (userInfo) => {
             res.password === password ?
                 result = { result: 'success', validated: true, details: username + ' validated', username }
                 :
-                result = { result: 'failed', details: 'invalid username or password' }
+                result = { result: 'failed', details: 'invalid password', server: {...server} }
         } else {
-            result = { result: 'failed', details: 'invalid username or password' };
+            result = { result: 'failed', details: 'invalid username',server:{...server} };
         };
 
     } catch (e) {
-        console.log('Error locating user: ' + username, e);
-        result = { result: 'failed', details: 'invalid username or password' };
+        result = handleError(e,'validateUser',{message: 'Error validating user'})
+        // console.log('Error locating user: ' + username, e);
+        // result = { result: 'failed', details: 'invalid username or password' };
 
     } finally {
         await mongoose.connection.close();
@@ -187,4 +205,3 @@ exports.validateUser = async (userInfo) => {
     };
 
 };
-
