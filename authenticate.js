@@ -5,6 +5,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken'); //sign and verify
 const User = require('./public/javascripts/db/dbModels/userModel');
 
+const TOKEN_TTL = 86400; // ONE DAY
 const mySecret = process.env.SECRET_KEY
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
@@ -12,11 +13,11 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 const options = {};
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = mySecret;
+options.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+options.secretOrKey = mySecret;
 
-function verifyMe(jwt_payload, done) {
-    User.findOne({ _id: jwt_payload._id },
+const verifyMe = (payload, done) => {
+    User.findOne({ _id: payload._id },
         (err, user) => {
             if (err) {
                 return done(err, false); //err occured
@@ -28,8 +29,10 @@ function verifyMe(jwt_payload, done) {
         });
 };
 
-exports.jwtPassport = passport.use(
-    new JwtStrategy(options, verifyMe)
-);
+exports.getToken = (user) => {
+    return jwt.sign(user, mySecret, { expiresIn: TOKEN_TTL })
+}
+
+exports.jwtPassport = passport.use(new JwtStrategy(options, verifyMe));
 
 exports.verifyUser = passport.authenticate('jwt', { session: false });
