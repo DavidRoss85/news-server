@@ -4,6 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 require('dotenv').config();
+const passport = require('passport');
 
 const indexRouter = require('./routes/indexRouter');
 const newsRouter = require('./routes/newsRouter');
@@ -32,6 +33,8 @@ app.use((req, res, next) => {
     res.appendHeader('Access-Control-Allow-Headers', '*')
     next();
 });
+
+app.use(passport.initialize());
 
 //Routers:
 app.use('/', indexRouter);
