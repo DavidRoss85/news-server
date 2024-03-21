@@ -19,7 +19,7 @@ const handleError = (err, moduleName, options = {}) => {
     if (consoleShow) {
         console.error(`\n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>`);
         console.log(`Details:\nName: ${err.name || null}`);
-        console.log('Reason: ',err.reason || null);
+        console.log('Reason: ', err.reason || null);
         console.log(`<<<<<Error>>>>>\n${err}`);
     }
 
@@ -63,11 +63,21 @@ const handleError = (err, moduleName, options = {}) => {
             server.category = 'Error creating user'
             server.message = err.message
             break;
+        case 'IncorrectUsernameError':
+            server.code = 403;
+            server.category = 'Login Error'
+            server.message = 'Username not found'
+            break;
+        case 'IncorrectPasswordError':
+            server.code = 403;
+            server.category = 'Login Error'
+            server.message = 'Incorrect Password'
+            break;
         case mongoose.Error.MongooseServerSelectionError.name || 'MongoServerSelectionError':
             server.message = 'Could not connect to the server database'
             break;
         case 'MongooseError':
-            if (err.message.includes('buffering timed out')){
+            if (err.message.includes('buffering timed out')) {
                 server.message = 'Error communicating with the database: The server took too long to respond'
             };
             break;

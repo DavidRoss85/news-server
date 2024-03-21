@@ -30,9 +30,11 @@ userRouter.post('/login', (req, res, next) => {
             return;
         }
         if (!user) {
-            res.statusCode = 404;
+            const result = handleError(info, 'userRouter/post/login');
+            const { code, category, message } = result.server;
+            res.statusCode = code;
             res.setHeader('Content-Type', 'application/json');
-            res.json({ result: 'failed', details: info });
+            res.json({ result: 'error',code, category, message });
             return;
         }
         if (user) {
@@ -45,21 +47,14 @@ userRouter.post('/login', (req, res, next) => {
         }
     })(req, res, next);
 
-    // res.json({result: 'IDK how it got this far', user})
+
 
 });
-//     , 
-//     (req, res) => {
-//     const token = authenticate.getToken({ _id: req.user._id });
-//     res.statusCode = 200;
-//     res.setHeader('Content-Type', 'application/json');
-//     const {username, displayname } = req.user;
-//     res.json({  result: 'success', validated: true, token, username,displayname,details: req.user.username + ' validated',});
-// });
 
-userRouter.route('/logout')
-    .post(async (req, res, next) => {
+//Not required with token verification
+// userRouter.route('/logout')
+//     .post(async (req, res, next) => {
 
-    })
+//     })
 
 module.exports = userRouter;
