@@ -4,7 +4,7 @@ const passport = require('passport');
 const authenticate = require('../authenticate')
 const User = require('./models/userModel');
 const UserSetting = require('./models/userSettingModel');
-const handleError = require('../public/javascripts/handleError');
+const handleError = require('../js/handleError');
 
 //Event handlers:
 mongoose.connection.on('connected', () => { connected = true; console.log('MongoDB connected') });
@@ -16,7 +16,7 @@ mongoose.connection.on('close', () => console.log('Mongo DB close'));
 
 //connect db:
 exports.connectToDatabase = async () => {
-    console.log('Mongoose state: ',mongoose.connection.readyState);
+    console.log('Mongoose state: ', mongoose.connection.readyState);
     let result = {};
     try {
         await mongoose.connect(url);
@@ -64,3 +64,50 @@ exports.createNewUser = async (userInfo) => {
     };
 
 };
+//Delete user:
+exports.deleteUser = async (userInfo, options = {}) => {
+    const { _id, username, email } = userInfo;
+    if (!username && !_id && !email) return handleError({name: 'NoUserName'},'dbHandler/deleteUser');
+    const {findBy = 'id'} = options;
+    const searchObj = {}
+    switch(findBy){
+        case 'id':
+            searchObj._id = _id;
+            break;
+        case 'username':
+            searchObj.username = username;
+            break;
+        case 'email':
+            searchObj.email = email;
+            break;
+        default:
+            searchObj._id = _id;
+    };
+
+    let result = {};
+    try {
+        const res = await User.findOneAndDelete(searchObj);
+        result = res ?
+            { result: 'success', details: username + ' deleted' }
+            :
+            handleError({name:'UserDoesntExistsError'},'dbHandler/deleteUser');
+
+    } catch (err) {
+        result = handleError(err,'dbHandler/deleteUser');
+    } finally {
+        const allUsers = await User.find();
+        console.log('\n***\nHere are your updated users:\n', allUsers);
+        return result;
+    };
+};
+//changePassword:
+    //...code here
+//editUser
+    //...code here
+
+
+//-----------------
+//Settings handlers
+//-----------------
+
+

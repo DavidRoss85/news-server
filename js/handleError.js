@@ -9,11 +9,12 @@ const handleError = (err, moduleName, options = {}) => {
         message = 'An unhandled internal server error occurred',
     } = options;
 
+    //Returned to the client
     const server = {
         code,
         category,
         message,
-    }
+    };
 
     //Console log the error
     if (consoleShow) {
@@ -21,12 +22,11 @@ const handleError = (err, moduleName, options = {}) => {
         console.log(`Details:\nName: ${err.name || null}`);
         console.log('Reason: ', err.reason || null);
         console.log(`<<<<<Error>>>>>\n${err}`);
-    }
+    };
 
-    //Specify error messages
-    //Since mongodb and mongoose don't seem to return consistent errors/messages,
-    //the below code will handle identified scenarios.
-
+    //Specify error messages...
+    //Since mongodb, mongoose and passport don't seem to return consistent errors/messages,
+    //the below code will handle various identified scenarios.
     switch (err.code) {
         case 11000:
             if (err.keyPattern) {
@@ -40,8 +40,7 @@ const handleError = (err, moduleName, options = {}) => {
                 };
             };
             break;
-    }
-
+    };
     switch (err.name) {
         case 'NoUserName':
             server.code = 403;
@@ -51,41 +50,55 @@ const handleError = (err, moduleName, options = {}) => {
         case 'NoPassword':
             server.code = 403;
             server.category = 'Incomplete';
-            server.message = 'Password is required'
+            server.message = 'Password is required';
             break;
         case 'NoEmail':
             server.code = 403;
             server.category = 'Incomplete';
             server.message = 'Email is required';
             break;
+        case 'DeniedError':
+            server.code = 403;
+            server.category = 'Access Denied';
+            server.message = 'Attempt to access a resource without the proper credentials.'
+            break;
         case 'UserExistsError':
             server.code = 409;
-            server.category = 'Error creating user'
-            server.message = err.message
+            server.category = 'Error creating user';
+            server.message = err.message;
+            break;
+        case 'UserDoesntExistsError':
+            server.code = 409;
+            server.category = 'Database Conflict';
+            server.message = 'Could not locate the specified user';
             break;
         case 'IncorrectUsernameError':
             server.code = 403;
-            server.category = 'Login Error'
-            server.message = 'Username not found'
+            server.category = 'Login Error';
+            server.message = 'Username not found';
             break;
         case 'IncorrectPasswordError':
             server.code = 403;
-            server.category = 'Login Error'
-            server.message = 'Incorrect Password'
+            server.category = 'Login Error';
+            server.message = 'Incorrect Password';
             break;
         case mongoose.Error.MongooseServerSelectionError.name || 'MongoServerSelectionError':
-            server.message = 'Could not connect to the server database'
+            server.message = 'Could not connect to the server database';
             break;
         case 'MongooseError':
             if (err.message.includes('buffering timed out')) {
-                server.message = 'Error communicating with the database: The server took too long to respond'
+                server.message = 'Error communicating with the database: The server took too long to respond';
             };
             break;
-    }
+    };
+
+    //A flag to override the system message in favor of a custom one.
     if (override) {
         server.message = message;
-    }
-    return { result: 'error', details: err, server: { ...server } }
+    };
+
+    //return error object
+    return { result: 'error', details: err, server: { ...server } };
 };
 
 

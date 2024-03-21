@@ -1,21 +1,20 @@
 const express = require('express');
 const userRouter = express.Router();
-//import dbHandler here...
 const dbHandler = require('../db/dbHandler');
 const authenticate = require('../authenticate');
 const passport = require('passport');
-const handleError = require('../public/javascripts/handleError')
+const handleError = require('../js/handleError')
 
 
-
-// userRouter.use(express.json());
+//New User:
 userRouter.route('/signup')
     .post(async (req, res) => {
         const { username, password, email } = req.body
         const result = await dbHandler.createNewUser({ username, email, password });
         res.json(result);
-    })
+    });
 
+//Login:
 userRouter.post('/login', (req, res, next) => {
     console.log('Received post at /login');
 
@@ -26,7 +25,7 @@ userRouter.post('/login', (req, res, next) => {
             const { code, category, message } = result.server;
             res.statusCode = code;
             res.setHeader('Content-Type', 'application/json');
-            res.json({ result: 'error',code, category, message });
+            res.json({ result: 'error', code, category, message });
             return;
         }
         if (!user) {
@@ -34,7 +33,7 @@ userRouter.post('/login', (req, res, next) => {
             const { code, category, message } = result.server;
             res.statusCode = code;
             res.setHeader('Content-Type', 'application/json');
-            res.json({ result: 'error',code, category, message });
+            res.json({ result: 'error', code, category, message });
             return;
         }
         if (user) {
@@ -46,10 +45,24 @@ userRouter.post('/login', (req, res, next) => {
             return;
         }
     })(req, res, next);
-
-
-
 });
+
+userRouter.get('/settings/:userId',
+    passport.authenticate('local'),
+    (req, res, next) => {
+        if (req.user._id === req.params.userId) {
+            //get user settings
+        } else {
+            const result = handleError({ name: 'DeniedError' }, 'userRouter/get/settings/' + req.params.userId);
+            const { code, category, message } = result.server;
+            res.statusCode = code;
+            res.setHeader('Content-Type', 'application/json');
+            res.json({ result: 'error', code, category, message });
+            return;
+        }
+    });
+
+
 
 //Not required with token verification
 // userRouter.route('/logout')

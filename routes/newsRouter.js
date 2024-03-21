@@ -1,5 +1,5 @@
-const DEFAULTS = require('../public/javascripts/DEFAULTS')
-const myNews = require('../public/javascripts/newsAPI')
+const DEFAULTS = require('../js/DEFAULTS')
+const myNews = require('../js/newsAPI')
 const express = require('express');
 const newsRouter = express.Router();
 
