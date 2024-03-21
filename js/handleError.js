@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 
 const handleError = (err, moduleName, options = {}) => {
+    if(typeof err ==='string'){
+        err = {name: err};
+    };
     const {
         consoleShow = true,
         override = false,
@@ -64,16 +67,16 @@ const handleError = (err, moduleName, options = {}) => {
             break;
         case 'UserExistsError':
             server.code = 409;
-            server.category = 'Error creating user';
-            server.message = err.message;
+            server.category = 'Error creating record';
+            server.message = 'A record for the specified user already exists';
             break;
         case 'UserDoesntExistsError':
-            server.code = 409;
+            server.code = 404;
             server.category = 'Database Conflict';
             server.message = 'Could not locate the specified user';
             break;
         case 'IncorrectUsernameError':
-            server.code = 403;
+            server.code = 404;
             server.category = 'Login Error';
             server.message = 'Username not found';
             break;
@@ -89,6 +92,11 @@ const handleError = (err, moduleName, options = {}) => {
             if (err.message.includes('buffering timed out')) {
                 server.message = 'Error communicating with the database: The server took too long to respond';
             };
+            break;
+        case 'InvalidDataError':
+            server.code = 409;
+            server.category = 'Invalid data';
+            server.message = 'Improper data or data type';
             break;
     };
 

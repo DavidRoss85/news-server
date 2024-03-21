@@ -48,9 +48,9 @@ exports.disconnectFromDatabase = async () => {
 //New user:
 exports.createNewUser = async (userInfo) => {
     const { username, password, email, displayname, notes } = userInfo;
-    if (!username) return handleError({ name: 'NoUserName' }, 'dbHandler/createNewUser', { consoleShow: false });
-    if (!password) return handleError({ name: 'NoPassword' }, 'dbHandler/createNewUser', { consoleShow: false });
-    if (!email) return handleError({ name: 'NoEmail' }, 'dbHandler/createNewUser', { consoleShow: false });
+    if (!username) return handleError('NoUserName', 'dbHandler/createNewUser', { consoleShow: false });
+    if (!password) return handleError('NoPassword', 'dbHandler/createNewUser', { consoleShow: false });
+    if (!email) return handleError('NoEmail', 'dbHandler/createNewUser', { consoleShow: false });
 
     let result = {};
 
@@ -67,10 +67,10 @@ exports.createNewUser = async (userInfo) => {
 //Delete user:
 exports.deleteUser = async (userInfo, options = {}) => {
     const { _id, username, email } = userInfo;
-    if (!username && !_id && !email) return handleError({name: 'NoUserName'},'dbHandler/deleteUser');
-    const {findBy = 'id'} = options;
+    if (!username && !_id && !email) return handleError({ name: 'NoUserName' }, 'dbHandler/deleteUser');
+    const { findBy = 'id' } = options;
     const searchObj = {}
-    switch(findBy){
+    switch (findBy) {
         case 'id':
             searchObj._id = _id;
             break;
@@ -90,10 +90,10 @@ exports.deleteUser = async (userInfo, options = {}) => {
         result = res ?
             { result: 'success', details: username + ' deleted' }
             :
-            handleError({name:'UserDoesntExistsError'},'dbHandler/deleteUser');
+            handleError({ name: 'UserDoesntExistsError' }, 'dbHandler/deleteUser');
 
     } catch (err) {
-        result = handleError(err,'dbHandler/deleteUser');
+        result = handleError(err, 'dbHandler/deleteUser');
     } finally {
         const allUsers = await User.find();
         console.log('\n***\nHere are your updated users:\n', allUsers);
@@ -101,13 +101,112 @@ exports.deleteUser = async (userInfo, options = {}) => {
     };
 };
 //changePassword:
-    //...code here
+//...code here
 //editUser
-    //...code here
+//...code here
 
 
 //-----------------
 //Settings handlers
 //-----------------
 
+//Add settings
+exports.createNewSettings = async (settingsInfo) => {
+    const { _id, ...rest } = settingsInfo;
+    if (!_id || !settingsInfo || (settingsInfo instanceof Object !== true)) return handleError({ name: 'InvalidDataError' }, 'dbHandler/createNewSettings');
 
+    let result = {};
+    try {
+        const user = await UserSetting.findOne({ userId: _id })
+        if (!user) {
+            const res = await UserSetting.create({ ...rest });
+            result = { result: 'success', data: res, details: 'created new user settings for ' + username };
+        } else {
+            result = handleError({ name: 'UserExistsError' }, 'dbHandler/createNewSettings');
+        }
+
+    } catch (err) {
+        console.log('\nError creating new user settings: ');
+        result = handleError(err, 'dbHandler/createNewSettings');
+        // const errMsg = `${e}`;
+        // if (errMsg.startsWith(DUPLICATE_USER_MSG)) {
+        //     console.log('SETTINGS FOR THAT USER ALREADY EXIST');
+        //     result = { result: 'error', data: DEFAULTS.DEFAULT_USER_SETTINGS, details: 'user already exists' }
+        // } else {
+        //     console.log(e)
+        //     result = { result: 'error', data: DEFAULTS.DEFAULT_USER_SETTINGS, details: errMsg }
+        // };
+
+    } finally {
+        const allUsers = await UserSetting.find();
+        console.log('\n***\nHere are your settings:\n', allUsers);
+        return result;
+    };
+};
+//Update Settings:
+exports.updateSettings = async (settingsInfo) => {
+    const { _id, ...rest } = settingsInfo;
+    if (!settingsInfo || !_id || (settingsInfo instanceof Object !== true)) return handleError({ name: 'InvalidDataError' }, 'dbHandler/updateSettings');
+    let result = {};
+    try {
+        const res = await UserSetting.findOneAndUpdate({ userId: _id }, { ...rest }, { new: true });
+        console.log('\n\n\n\n\**************Update res: ', res);
+        result = res ?
+            { result: 'success', data: res, details: 'Settings updated' }
+            :
+            createNewSettings(settingsInfo);
+
+    } catch (err) {
+        result = handleError(err, 'dbHandler/updateSettings');
+
+    } finally {
+        const allUsers = await UserSetting.find();
+        console.log('\n***\nHere are your updated settings:\n', allUsers);
+        return result;
+    };
+
+};
+//Delete Settings:
+exports.deleteSettings = async (settingsInfo) => {
+    const { _id } = settingsInfo;
+    if (!_id) return handleError({ name: 'InvalidDataError' }, 'dbHandler/deleteSettings');
+    let result = {};
+    try {
+        const res = await UserSetting.findOneAndDelete({ userId: _id });
+        result = res ?
+            { result: 'success', details: username + ' settings deleted' }
+            :
+            handleError({name:'UserDoesntExistsError'},'dbHandler/deleteSettings');
+
+    } catch (err) {
+        result = handleError(err, 'dbHandler/deleteSettings');
+
+    } finally {
+        const allUsers = await UserSetting.find();
+        console.log('\n***\nHere are your updated users:\n', allUsers);
+        return result;
+    };
+
+};
+//Get Settings:
+exports.getSettings = async (userInfo) => {
+    const { _id } = userInfo;
+    if (!_id) return handleError({ name: 'InvalidDataError' }, 'dbHandler/getSettings');
+    let result = {};
+    try {
+        const res = await UserSetting.findOne({ userId: _id });
+        if (res) {
+            console.log(username + 'found');
+            result = { result: 'success', data: res, details: username + ' validated' }
+        } else {
+            result = handleError('UserDoesntExistsError','dbHandler/getSettings')
+        };
+
+    } catch (err) {
+        result = handleError(err,'dbHandler/getSettings');
+
+    } finally {
+        return result;
+    };
+
+};

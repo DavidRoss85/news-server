@@ -31,6 +31,10 @@ const preferenceSchema = new Schema(
 
 const userSchema = new Schema(
     {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        },
         username: {
             type: String,
             required: true,
@@ -39,7 +43,7 @@ const userSchema = new Schema(
         displayname: {
             type: String,
             required: true,
-            default: 'Welcome'
+            default: 'Welcome',
         },
         avatar: {
             type: String,
