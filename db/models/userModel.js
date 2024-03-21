@@ -7,10 +7,20 @@ const userSchema = new Schema(
         displayname: {
             type: String,
             required: true,
-            default: 'Welcome'
+            default: 'Welcome',
+        },
+        email:{
+            type: String,
+            required: true,
+            unique: true,
         },
         notes: {
             type: String,
+        },
+        admin: {
+            type: Boolean,
+            required: true,
+            default: false,
         }
     },
     {

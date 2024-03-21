@@ -1,7 +1,7 @@
 const express = require('express');
 const userRouter = express.Router();
 const DEFAULTS = require('../public/javascripts/DEFAULTS');
-const dbHandler = require('../public/javascripts/db/userSettingsDbHandler')
+const dbHandler = require('../db/userSettingsDbHandler')
 
 userRouter.use(express.json());
 userRouter.route('/')

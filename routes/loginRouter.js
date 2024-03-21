@@ -1,7 +1,7 @@
 const express = require('express');
 const loginRouter = express.Router();
-const dbHandler = require('../public/javascripts/db/loginDbHandler');
-const { db } = require('../public/javascripts/db/dbModels/userSettingModel');
+const dbHandler = require('../db/loginDbHandler');
+const { db } = require('../db/models/userSettingModel');
 //For testing purposes
 testUser = {
     validated: true,

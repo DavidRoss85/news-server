@@ -3,7 +3,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken'); //sign and verify
-const User = require('./public/javascripts/db/dbModels/userModel');
+const User = require('./db/models/userModel');
 
 const TOKEN_TTL = 86400; // ONE DAY
 const mySecret = process.env.SECRET_KEY
@@ -22,8 +22,10 @@ const verifyMe = (payload, done) => {
             if (err) {
                 return done(err, false); //err occured
             } else if (user) {
+                console.log('YAAAAAAAAAAAYYYYYYY')
                 return done(null, user); //user found
             } else {
+                console.log('BOOOOOOOOOOOOOOOOOOO')
                 return done(null, false); //no user found
             };
         });

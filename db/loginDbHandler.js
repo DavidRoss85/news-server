@@ -1,8 +1,8 @@
 const DUPLICATE_USER_MSG = 'MongoServerError: E11000 duplicate key error collection: newsFeedData.users index: username';
 const url = 'mongodb://127.0.0.1:27017/newsFeedData';
 const mongoose = require('mongoose');
-const User = require('./dbModels/userModel');
-const handleError = require('../handleError')
+const User = require('./models/userModel');
+const handleError = require('../public/javascripts/handleError')
 
 //Event handlers:
 mongoose.connection.on('connected', () => console.log('MongoDB connected'));
