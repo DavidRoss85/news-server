@@ -4,6 +4,7 @@ const userRouter = express.Router();
 const dbHandler = require('../db/dbHandler');
 const authenticate = require('../authenticate');
 const passport = require('passport');
+const handleError = require('../public/javascripts/handleError')
 
 
 
@@ -11,17 +12,50 @@ const passport = require('passport');
 userRouter.route('/signup')
     .post(async (req, res) => {
         const { username, password, email } = req.body
-        const result = await dbHandler.createNewUser({ username, email, password, req, res });
+        const result = await dbHandler.createNewUser({ username, email, password });
         res.json(result);
     })
 
-userRouter.post('/login', passport.authenticate('local'), (req, res) => {
-    const token = authenticate.getToken({ _id: req.user._id });
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    const {username, displayname } = req.user;
-    res.json({  result: 'success', validated: true, token, username,displayname,details: req.user.username + ' validated',});
+userRouter.post('/login', (req, res, next) => {
+    console.log('Received post at /login');
+
+    passport.authenticate('local', (err, user, info) => {
+        console.log('Attempting to authenticate at /login')
+        if (err) {
+            const result = handleError(err, 'userRouter/post/login');
+            const { code, category, message } = result.server;
+            res.statusCode = code;
+            res.setHeader('Content-Type', 'application/json');
+            res.json({ result: 'error',code, category, message });
+            return;
+        }
+        if (!user) {
+            res.statusCode = 404;
+            res.setHeader('Content-Type', 'application/json');
+            res.json({ result: 'failed', details: info });
+            return;
+        }
+        if (user) {
+            const token = authenticate.getToken({ _id: user._id });
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            const { username, displayname } = user;
+            res.json({ result: 'success', validated: true, token, username, displayname, details: user.username + ' validated', });
+            return;
+        }
+    })(req, res, next);
+
+    // res.json({result: 'IDK how it got this far', user})
+
 });
+//     , 
+//     (req, res) => {
+//     const token = authenticate.getToken({ _id: req.user._id });
+//     res.statusCode = 200;
+//     res.setHeader('Content-Type', 'application/json');
+//     const {username, displayname } = req.user;
+//     res.json({  result: 'success', validated: true, token, username,displayname,details: req.user.username + ' validated',});
+// });
 
 userRouter.route('/logout')
     .post(async (req, res, next) => {

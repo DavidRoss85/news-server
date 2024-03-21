@@ -16,6 +16,7 @@ mongoose.connection.on('close', () => console.log('Mongo DB close'));
 
 //connect db:
 exports.connectToDatabase = async () => {
+    console.log('Mongoose state: ',mongoose.connection.readyState);
     let result = {};
     try {
         await mongoose.connect(url);

@@ -6,7 +6,7 @@ const handleError = (err, moduleName, options = {}) => {
         override = false,
         code = 500,
         category = 'Internal Server Error',
-        message = 'An internal Server Error occurred',
+        message = 'An unhandled internal server error occurred',
     } = options;
 
     const server = {
@@ -19,11 +19,14 @@ const handleError = (err, moduleName, options = {}) => {
     if (consoleShow) {
         console.error(`\n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>`);
         console.log(`Details:\nName: ${err.name || null}`);
-        console.log(`Reason: ${err.reason || null}`);
+        console.log('Reason: ',err.reason || null);
         console.log(`<<<<<Error>>>>>\n${err}`);
     }
 
     //Specify error messages
+    //Since mongodb and mongoose don't seem to return consistent errors/messages,
+    //the below code will handle identified scenarios.
+
     switch (err.code) {
         case 11000:
             if (err.keyPattern) {
@@ -34,9 +37,8 @@ const handleError = (err, moduleName, options = {}) => {
                     server.message = 'That email address is already registered on this server'
                 } else {
                     server.message = 'Attempt to enter a non-unique value in ' + dupField;
-                }
-
-            }
+                };
+            };
             break;
     }
 
@@ -61,8 +63,13 @@ const handleError = (err, moduleName, options = {}) => {
             server.category = 'Error creating user'
             server.message = err.message
             break;
-        case mongoose.Error.MongooseServerSelectionError.name:
+        case mongoose.Error.MongooseServerSelectionError.name || 'MongoServerSelectionError':
             server.message = 'Could not connect to the server database'
+            break;
+        case 'MongooseError':
+            if (err.message.includes('buffering timed out')){
+                server.message = 'Error communicating with the database: The server took too long to respond'
+            };
             break;
     }
     if (override) {
