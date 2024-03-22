@@ -73,9 +73,10 @@ exports.createNewUser = async (userInfo) => {
     if (!email) return handleError('NoEmail', 'dbHandler/createNewUser', { consoleShow: false });
 
     let result = {};
-
+    
     try {
-        const user = await User.register(new User({ username, email, displayname, notes }), password)
+        const lowerCaseUsername = username.toLowerCase()
+        const user = await User.register(new User({ username:lowerCaseUsername, email, displayname, notes }), password)
         result = { result: 'success', code: 200, category: 'Register', message: 'Registration Successful for ' + user.username, details: 'Successfully registered user ' + user.username };
         systemLog(result.details, { consoleShow: true });
     } catch (err) {

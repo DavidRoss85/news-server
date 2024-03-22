@@ -23,7 +23,7 @@ userRouter.route('/signup')
 //Login:
 userRouter.post('/login', (req, res, next) => {
    systemLog('Received post at /login',{message: req.body.username, ...CONSOLE_SHOW});
-
+    req.body.username = req.body.username.toLowerCase();
     passport.authenticate('local', (err, user, info) => {
        systemLog('Attempting to authenticate login',{message:'', ...CONSOLE_SHOW});
         if (err) {

@@ -49,3 +49,27 @@ Time,Event Type, Event Details, Messages
 1711147201738,Event,65fced4f285929986c560c62 settings retrieved,
 1711147247525,Event,Received a put request at /settings,[object Object]
 1711147247550,Event,65fced4f285929986c560c62 settings updated,
+1711148654140,Event,System start,OK!
+1711148654141,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711148654159,Event,--Mongo DB Connected--,
+1711148654159,Event,--Mongo DB Connection *Open*--,
+1711148654160,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711148662407,Event,Successfully registered user defaultuser,
+1711148720603,Event,Successfully registered user defaultuser,
+1711148722650,Error,UserExistsError: A user with the given username is already registered,An unhandled internal server error occurred,A record for the specified user already exists,A user with the given username is already registered
+1711148730048,Event,Successfully registered user january,
+1711148736006,Event,Successfully registered user user,
+1711148741068,Error,UserExistsError: A user with the given username is already registered,An unhandled internal server error occurred,A record for the specified user already exists,A user with the given username is already registered
+1711148751147,Event,Successfully registered user testuser,
+1711148910701,Event,System start,OK!
+1711148910703,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711148910722,Event,--Mongo DB Connection *Open*--,
+1711148910723,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711148910722,Event,--Mongo DB Connected--,
+1711148940064,Event,Successfully registered user testuser,
+1711148948821,Error,MongoServerError: E11000 duplicate key error collection: newsFeedData.users index: email_1 dup key: { email: "email@email.com" },An unhandled internal server error occurred,That email address is already registered on this server,E11000 duplicate key error collection: newsFeedData.users index: email_1 dup key: { email: "email@email.com" }
+1711149005491,Error,MongoServerError: E11000 duplicate key error collection: newsFeedData.users index: email_1 dup key: { email: "email@email.com" },An unhandled internal server error occurred,That email address is already registered on this server,E11000 duplicate key error collection: newsFeedData.users index: email_1 dup key: { email: "email@email.com" }
+1711149013739,Error,MongoServerError: E11000 duplicate key error collection: newsFeedData.users index: email_1 dup key: { email: "email@email.com" },An unhandled internal server error occurred,That email address is already registered on this server,E11000 duplicate key error collection: newsFeedData.users index: email_1 dup key: { email: "email@email.com" }
+1711149021771,Event,Successfully registered user defaultuser,
+1711149035280,Error,UserExistsError: A user with the given username is already registered,An unhandled internal server error occurred,A record for the specified user already exists,A user with the given username is already registered
+1711149086114,Event,Successfully registered user user,

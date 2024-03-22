@@ -17,7 +17,7 @@ const userRouter = require('./routes/userRouter');
 
 const app = express();
 
-sleep(3000)
+sleep(500)
   .then(() => {
     systemLog('System start', 'OK!');
     systemLog('\n\n************\n************\nBEGIN SERVER\n************\n************', { consoleShow: true, logFile: false, lineBreak: '<none>' })
