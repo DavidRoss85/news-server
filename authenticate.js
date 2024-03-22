@@ -16,19 +16,19 @@ const options = {};
 options.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 options.secretOrKey = mySecret;
 
-const verifyMe = (payload, done) => {
-    User.findOne({ _id: payload._id },
-        (err, user) => {
-            if (err) {
-                return done(err, false); //err occured
-            } else if (user) {
-                console.log('YAAAAAAAAAAAYYYYYYY')
-                return done(null, user); //user found
-            } else {
-                console.log('BOOOOOOOOOOOOOOOOOOO')
-                return done(null, false); //no user found
-            };
-        });
+const verifyMe = async (payload, done) => {
+
+    try {
+        const user = await User.findOne({ _id: payload._id })
+        if (user) {
+            return done(null, user); //user found
+        } else {
+            return done(null, false); //no user found
+        };
+
+    } catch (err) {
+        return done(err, false); //err occured
+    }
 };
 
 exports.getToken = (user) => {

@@ -7,20 +7,36 @@ const UserSetting = require('./models/userSettingModel');
 const handleError = require('../js/handleError');
 
 //Event handlers:
-mongoose.connection.on('connected', () => { connected = true; console.log('MongoDB connected') });
-mongoose.connection.on('open', () => console.log('MongoDB open'));
-mongoose.connection.on('disconnected', () => { connected = false; console.log('Mongo DB disconnected') });
-mongoose.connection.on('reconnected', () => console.log('Mongo DB reconnected'));
-mongoose.connection.on('disconnecting', () => console.log('Mongo DB disconnecting'));
-mongoose.connection.on('close', () => console.log('Mongo DB close'));
+mongoose.connection.on('connected', () => { connected = true; console.log('\n**********\nMongoDB connected') });
+mongoose.connection.on('open', () => console.log('MongoDB connection open\n**********'));
+mongoose.connection.on('disconnected', () => { connected = false; console.log('\n***Mongo DB disconnected***\n') });
+mongoose.connection.on('reconnected', () => console.log('\n---Mongo DB reconnected---\n'));
+mongoose.connection.on('disconnecting', () => console.log('\n>>>Mongo DB disconnecting<<<\n'));
+mongoose.connection.on('close', () => console.log('\nxxx Mongo DB connection closed xxx\n'));
+
+//sleep timer
+const sleep = async (ms) => {
+    return new Promise((resolve) => { setTimeout(resolve, ms) })
+}
+
+
+
 
 //connect db:
 exports.connectToDatabase = async () => {
     console.log('Mongoose state: ', mongoose.connection.readyState);
     let result = {};
     try {
-        await mongoose.connect(url);
-        result = { result: 'connected', details: `Connected to database at ${url}` }
+        if(!mongoose.connection.readyState){
+            mongoose.connect(url);
+            result = { result: 'connected', details: `Connected to database at ${url}` }
+        }else if(mongoose.connection.readyState===3){
+            await sleep(5000);
+            mongoose.connect(url);
+            result = { result: 'connected', details: `Connected to database at ${url}` }
+        } else{
+
+        }
     } catch (err) {
         result = handleError(err, 'dbHandler/connectToDatabase');
     } finally {
@@ -56,7 +72,7 @@ exports.createNewUser = async (userInfo) => {
 
     try {
         const user = await User.register(new User({ username, email, displayname, notes }), password)
-        result = { result: 'success', details: 'Successfully registered user ' + user.username };
+        result = { result: 'success', code: 200, category:'Register',message:'Registration Successful for '+ user.username, details: 'Successfully registered user ' + user.username };
     } catch (err) {
         result = handleError(err, 'dbHandler/createNewUser');
     } finally {
@@ -67,7 +83,7 @@ exports.createNewUser = async (userInfo) => {
 //Delete user:
 exports.deleteUser = async (userInfo, options = {}) => {
     const { _id, username, email } = userInfo;
-    if (!username && !_id && !email) return handleError({ name: 'NoUserName' }, 'dbHandler/deleteUser');
+    if (!username && !_id && !email) return handleError('NoUserName', 'dbHandler/deleteUser');
     const { findBy = 'id' } = options;
     const searchObj = {}
     switch (findBy) {
@@ -88,9 +104,9 @@ exports.deleteUser = async (userInfo, options = {}) => {
     try {
         const res = await User.findOneAndDelete(searchObj);
         result = res ?
-            { result: 'success', details: username + ' deleted' }
+            { result: 'success', code: 200, category:'Delete',message:'User ' + res.username + ' deleted', details: res.username + ' deleted' }
             :
-            handleError({ name: 'UserDoesntExistsError' }, 'dbHandler/deleteUser');
+            handleError('UserDoesntExistsError', 'dbHandler/deleteUser');
 
     } catch (err) {
         result = handleError(err, 'dbHandler/deleteUser');
@@ -113,16 +129,16 @@ exports.deleteUser = async (userInfo, options = {}) => {
 //Add settings
 exports.createNewSettings = async (settingsInfo) => {
     const { _id, ...rest } = settingsInfo;
-    if (!_id || !settingsInfo || (settingsInfo instanceof Object !== true)) return handleError({ name: 'InvalidDataError' }, 'dbHandler/createNewSettings');
+    if (!_id || !settingsInfo || (settingsInfo instanceof Object !== true)) return handleError('InvalidDataError', 'dbHandler/createNewSettings');
 
     let result = {};
     try {
         const user = await UserSetting.findOne({ userId: _id })
         if (!user) {
-            const res = await UserSetting.create({ ...rest });
-            result = { result: 'success', data: res, details: 'created new user settings for ' + username };
+            const res = await UserSetting.create({ userId: _id, ...rest });
+            result = { result: 'success',code: 200, category:'Settings',message:'New settings created ', data: res, details: 'created new user settings for ' + _id };
         } else {
-            result = handleError({ name: 'UserExistsError' }, 'dbHandler/createNewSettings');
+            result = handleError('UserExistsError', 'dbHandler/createNewSettings');
         }
 
     } catch (err) {
@@ -146,15 +162,15 @@ exports.createNewSettings = async (settingsInfo) => {
 //Update Settings:
 exports.updateSettings = async (settingsInfo) => {
     const { _id, ...rest } = settingsInfo;
-    if (!settingsInfo || !_id || (settingsInfo instanceof Object !== true)) return handleError({ name: 'InvalidDataError' }, 'dbHandler/updateSettings');
+    if (!settingsInfo || !_id || (settingsInfo instanceof Object !== true)) return handleError('InvalidDataError', 'dbHandler/updateSettings');
     let result = {};
     try {
         const res = await UserSetting.findOneAndUpdate({ userId: _id }, { ...rest }, { new: true });
         console.log('\n\n\n\n\**************Update res: ', res);
         result = res ?
-            { result: 'success', data: res, details: 'Settings updated' }
+            { result: 'success',code: 200, category:'Settings',message:'Settings updated', data: res, details: 'Settings updated' }
             :
-            createNewSettings(settingsInfo);
+            this.createNewSettings(settingsInfo);
 
     } catch (err) {
         result = handleError(err, 'dbHandler/updateSettings');
@@ -169,14 +185,14 @@ exports.updateSettings = async (settingsInfo) => {
 //Delete Settings:
 exports.deleteSettings = async (settingsInfo) => {
     const { _id } = settingsInfo;
-    if (!_id) return handleError({ name: 'InvalidDataError' }, 'dbHandler/deleteSettings');
+    if (!_id) return handleError('InvalidDataError', 'dbHandler/deleteSettings');
     let result = {};
     try {
         const res = await UserSetting.findOneAndDelete({ userId: _id });
         result = res ?
-            { result: 'success', details: username + ' settings deleted' }
+            { result: 'success',code: 200, category:'Settings',message:'Settings deleted ', details: _id + ' settings deleted' }
             :
-            handleError({name:'UserDoesntExistsError'},'dbHandler/deleteSettings');
+            handleError('UserDoesntExistsError', 'dbHandler/deleteSettings');
 
     } catch (err) {
         result = handleError(err, 'dbHandler/deleteSettings');
@@ -191,19 +207,18 @@ exports.deleteSettings = async (settingsInfo) => {
 //Get Settings:
 exports.getSettings = async (userInfo) => {
     const { _id } = userInfo;
-    if (!_id) return handleError({ name: 'InvalidDataError' }, 'dbHandler/getSettings');
+    if (!_id) return handleError('InvalidDataError', 'dbHandler/getSettings');
     let result = {};
     try {
         const res = await UserSetting.findOne({ userId: _id });
         if (res) {
-            console.log(username + 'found');
-            result = { result: 'success', data: res, details: username + ' validated' }
+            result = { result: 'success',code: 200, category:'Settings',message:'Settings retrieved', data: res, details: res.username + ' validated' }
         } else {
-            result = handleError('UserDoesntExistsError','dbHandler/getSettings')
+            result = handleError('UserDoesntExistsError', 'dbHandler/getSettings')
         };
 
     } catch (err) {
-        result = handleError(err,'dbHandler/getSettings');
+        result = handleError(err, 'dbHandler/getSettings');
 
     } finally {
         return result;

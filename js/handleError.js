@@ -106,7 +106,7 @@ const handleError = (err, moduleName, options = {}) => {
     };
 
     //return error object
-    return { result: 'error', details: err, server: { ...server } };
+    return { result: 'error', details: err,  ...server  };
 };
 
 

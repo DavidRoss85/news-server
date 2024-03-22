@@ -19,7 +19,6 @@ module.exports.ERROR_NEWS = {
 };
 
 module.exports.TEST_USER_SETTINGS = {
-    "username": "David",
     "avatar": "",
     "preferences": {
         "region": "",
