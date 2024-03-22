@@ -45,8 +45,8 @@ userRouter.post('/login', (req, res, next) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
             const { username, displayname } = user;
-            res.cookie('jwtNsLogin', token, { httpOnly: true })
-            res.json({ result: 'success', validated: true, token, username, displayname, details: user.username + ' validated', });
+            // res.cookie('jwtNsLogin', token, { httpOnly: true })
+            res.json({ result: 'success', validated: true, accessToken: token, username, displayname, details: user.username + ' validated', });
             return;
         }
     })(req, res, next);

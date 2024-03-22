@@ -13,13 +13,14 @@ exports.local = passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+//Alternative using cookies
 const cookieExtractor = (req) => {
     const token = req && req.cookies ? req.cookies['jwtNsLogin'] : null;
     return token;
 }
 
 const options = {};
-options.jwtFromRequest = cookieExtractor//ExtractJwt.fromAuthHeaderAsBearerToken();
+options.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken(); //cookieExtractor
 options.secretOrKey = mySecret;
 
 const verifyMe = async (payload, done) => {

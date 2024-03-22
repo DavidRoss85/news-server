@@ -61,7 +61,7 @@ const handleError = (err, moduleName, options = {}) => {
             server.message = 'Email is required';
             break;
         case 'DeniedError':
-            server.code = 403;
+            server.code = 401;
             server.category = 'Access Denied';
             server.message = 'Attempt to access a resource without the proper credentials.'
             break;
@@ -76,12 +76,12 @@ const handleError = (err, moduleName, options = {}) => {
             server.message = 'Could not locate the specified user';
             break;
         case 'IncorrectUsernameError':
-            server.code = 404;
+            server.code = 401;
             server.category = 'Login Error';
             server.message = 'Username not found';
             break;
         case 'IncorrectPasswordError':
-            server.code = 403;
+            server.code = 401;
             server.category = 'Login Error';
             server.message = 'Incorrect Password';
             break;

@@ -7,6 +7,10 @@ require('dotenv').config();
 const passport = require('passport');
 const dbHandler = require('./db/dbHandler');
 
+// const cors = require('cors');
+// const whitelist = ['http://localhost:3000'];
+
+
 const indexRouter = require('./routes/indexRouter');
 const newsRouter = require('./routes/newsRouter');
 const userRouter = require('./routes/userRouter');
@@ -28,13 +32,26 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// CORS STUFF:
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (whitelist.indexOf(origin) !== -1) {
+//       callback(null, true)
+//     } else {
+//       callback(new Error('Not allowed by CORS'))
+//     }
+//   }
+// }
+
+// app.use(cors(corsOptions));
+
 app.use((req, res, next) => {
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json')
   res.appendHeader('Access-Control-Allow-Origin', '*');
   res.appendHeader('Access-Control-Allow-Credentials', 'true');
-  res.appendHeader('Access-Control-Allow-Methods', '*');
-  res.appendHeader('Access-Control-Allow-Headers', '*')
+  res.appendHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.appendHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   next();
 });
 
