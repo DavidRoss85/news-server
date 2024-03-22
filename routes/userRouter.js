@@ -45,6 +45,7 @@ userRouter.post('/login', (req, res, next) => {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
             const { username, displayname } = user;
+            res.cookie('jwtNsLogin', token, { httpOnly: true })
             res.json({ result: 'success', validated: true, token, username, displayname, details: user.username + ' validated', });
             return;
         }
@@ -122,7 +123,15 @@ userRouter.route('/settings/:userId')
             };
         })
 
-
+userRouter.route('/test')
+.get((req,res)=>{
+    if(req.cookies){
+        res.json({message:'There are cookies',cookies: req.cookies})
+    
+    }else{
+        res.json({message:'There are no cookies'})
+    }
+})
 
 //Not required with token verification
 // userRouter.route('/logout')

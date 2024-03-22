@@ -4,16 +4,22 @@ const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const jwt = require('jsonwebtoken'); //sign and verify
 const User = require('./db/models/userModel');
+const DEFAULTS = require('./js/DEFAULTS')
 
-const TOKEN_TTL = 86400; // ONE DAY
+// const TOKEN_TTL = 86400; // ONE DAY
 const mySecret = process.env.SECRET_KEY
 
 exports.local = passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+const cookieExtractor = (req) => {
+    const token = req && req.cookies ? req.cookies['jwtNsLogin'] : null;
+    return token;
+}
+
 const options = {};
-options.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+options.jwtFromRequest = cookieExtractor//ExtractJwt.fromAuthHeaderAsBearerToken();
 options.secretOrKey = mySecret;
 
 const verifyMe = async (payload, done) => {
@@ -32,7 +38,7 @@ const verifyMe = async (payload, done) => {
 };
 
 exports.getToken = (user) => {
-    return jwt.sign(user, mySecret, { expiresIn: TOKEN_TTL })
+    return jwt.sign(user, mySecret, { expiresIn: DEFAULTS.TOKEN_TTL })
 }
 
 exports.jwtPassport = passport.use(new JwtStrategy(options, verifyMe));
