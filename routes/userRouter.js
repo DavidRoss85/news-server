@@ -3,8 +3,10 @@ const userRouter = express.Router();
 const dbHandler = require('../db/dbHandler');
 const authenticate = require('../authenticate');
 const passport = require('passport');
-const handleError = require('../js/handleError')
+const handleError = require('../js/handleError');
+const { systemLog } = require('../logs/logHandler');
 
+const CONSOLE_SHOW ={consoleShow:true}
 
 //New User:
 userRouter.route('/signup')
@@ -20,10 +22,10 @@ userRouter.route('/signup')
 
 //Login:
 userRouter.post('/login', (req, res, next) => {
-    console.log('Received post at /login');
+   systemLog('Received post at /login',{message: req.body.username, ...CONSOLE_SHOW});
 
     passport.authenticate('local', (err, user, info) => {
-        console.log('Attempting to authenticate at /login')
+       systemLog('Attempting to authenticate login',{message:'', ...CONSOLE_SHOW});
         if (err) {
             const result = handleError(err, 'userRouter/post/login');
             const { details, ...rest } = result;
@@ -41,6 +43,7 @@ userRouter.post('/login', (req, res, next) => {
             return;
         }
         if (user) {
+            systemLog('Login success',{message: user.username, ...CONSOLE_SHOW});
             const token = authenticate.getToken({ _id: user._id });
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -69,7 +72,7 @@ userRouter.route('/settings')
         })
     .put(authenticate.verifyUser,
         async (req, res) => {
-            console.log('Received a put request', req.body)
+            systemLog('Received a put request at /settings', {message: req.body, ...CONSOLE_SHOW})
             if (req.user.admin === true) {
                 //Do admin only process:
             }
@@ -104,7 +107,7 @@ userRouter.route('/settings/:userId')
         })
     .put(authenticate.verifyUser,
         async (req, res) => {
-            console.log('Received a put request', req.body)
+            systemLog('Received a put request at /settings/' + req.params.userId, {message: req.body, ...CONSOLE_SHOW})
             if (`${req.user._id}` === `${req.params.userId}` || req.user.admin === true) {
                 //if admin or same id:
                 const result = await dbHandler.updateSettings({ _id: req.params.userId, ...req.body.data });

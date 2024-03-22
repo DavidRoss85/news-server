@@ -1,0 +1,51 @@
+Time,Event Type, Event Details, Messages
+1711145400173,Event,System start,OK!
+1711145504209,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711145559902,Event,System start,OK!
+1711145559904,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711145559920,Event,--Mongo DB Connected--,
+1711145559921,Event,--Mongo DB Connection *Open*--,
+1711145559922,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711145720704,Event,System start,OK!
+1711145720705,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711145720721,Event,--Mongo DB Connected--,
+1711145720721,Event,--Mongo DB Connection *Open*--,
+1711145720721,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711145746921,Event,System start,OK!
+1711145746922,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711145746939,Event,--Mongo DB Connected--,
+1711145746939,Event,--Mongo DB Connection *Open*--,
+1711145746940,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711145817110,Event,System start,OK!
+1711145817111,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711145817130,Event,--Mongo DB Connected--,
+1711145817130,Event,--Mongo DB Connection *Open*--,
+1711145817130,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711146566294,Event,System start,OK!
+1711146566295,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711146566313,Event,--Mongo DB Connected--,
+1711146566313,Event,--Mongo DB Connection *Open*--,
+1711146566314,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711146631358,Event,Received post at /login,[object Object]
+1711146631460,Event,Attempting to authenticate login
+1711146631492,Event,undefined settings retrieved,
+1711147057206,Event,System start,OK!
+1711147057207,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711147057223,Event,--Mongo DB Connected--,
+1711147057224,Event,--Mongo DB Connection *Open*--,
+1711147057224,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711147060971,Event,Received post at /login,defaultUser
+1711147061062,Event,Attempting to authenticate login,
+1711147061063,Event,Login success,defaultUser
+1711147061074,Event,undefined settings retrieved,
+1711147197398,Event,System start,OK!
+1711147197400,Event,Attempting to connect to database at mongodb://localhost:27017/newsFeedData,
+1711147197417,Event,--Mongo DB Connected--,
+1711147197417,Event,--Mongo DB Connection *Open*--,
+1711147197418,Event,Connected to database at mongodb://localhost:27017/newsFeedData,
+1711147201634,Event,Received post at /login,defaultUser
+1711147201726,Event,Attempting to authenticate login,
+1711147201726,Event,Login success,defaultUser
+1711147201738,Event,65fced4f285929986c560c62 settings retrieved,
+1711147247525,Event,Received a put request at /settings,[object Object]
+1711147247550,Event,65fced4f285929986c560c62 settings updated,

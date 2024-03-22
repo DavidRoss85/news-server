@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
+const logHandler= require('../logs/logHandler');
 
 const handleError = (err, moduleName, options = {}) => {
     if(typeof err ==='string'){
         err = {name: err};
     };
     const {
+        logFile = true,
         consoleShow = true,
         override = false,
         code = 500,
@@ -18,14 +20,23 @@ const handleError = (err, moduleName, options = {}) => {
         category,
         message,
     };
-
+    // const logMessage = `
+    // \n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>
+    // Details:\nName: ${err.name || null}
+    // Reason: ${err.reason || null}
+    // <<<<<Error>>>>>\n${err}`
+    //System Log
+   
+   
+        // if (consoleShow) {
+    
+        //     console.error(`\n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>`);
+        //     console.log(`Details:\nName: ${err.name || null}`);
+        //     console.log('Reason: ', err.reason || null);
+        //     console.log(`<<<<<Error>>>>>\n${err}`);
+        // };
+    
     //Console log the error
-    if (consoleShow) {
-        console.error(`\n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>`);
-        console.log(`Details:\nName: ${err.name || null}`);
-        console.log('Reason: ', err.reason || null);
-        console.log(`<<<<<Error>>>>>\n${err}`);
-    };
 
     //Specify error messages...
     //Since mongodb, mongoose and passport don't seem to return consistent errors/messages,
@@ -104,6 +115,15 @@ const handleError = (err, moduleName, options = {}) => {
     if (override) {
         server.message = message;
     };
+
+
+    logHandler.systemLog(err,{
+        isErr:true,
+        consoleShow: consoleShow, 
+        message: `${message},${server.message},${err.message}`,
+        moduleName,
+        logFile
+    })
 
     //return error object
     return { result: 'error', details: err,  ...server  };

@@ -6,20 +6,24 @@ const logger = require('morgan');
 require('dotenv').config();
 const passport = require('passport');
 const dbHandler = require('./db/dbHandler');
-
-// const cors = require('cors');
-// const whitelist = ['http://localhost:3000'];
-
+const { systemLog } = require('./logs/logHandler')
+const { sleep } = require('./js/utils');
 
 const indexRouter = require('./routes/indexRouter');
 const newsRouter = require('./routes/newsRouter');
 const userRouter = require('./routes/userRouter');
-// const loginRouter = require('./routes/loginRouter')
-
+// const cors = require('cors');
+// const whitelist = ['http://localhost:3000'];
 
 const app = express();
-console.log('\n\n************\n************\nBEGIN SERVER\n************\n************')
-dbHandler.connectToDatabase();
+
+sleep(3000)
+  .then(() => {
+    systemLog('System start', 'OK!');
+    systemLog('\n\n************\n************\nBEGIN SERVER\n************\n************', { consoleShow: true, logFile: false, lineBreak: '<none>' })
+    dbHandler.connectToDatabase();
+  });
+
 
 
 // view engine setup

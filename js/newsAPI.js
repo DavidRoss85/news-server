@@ -3,10 +3,12 @@ const apiKey = process.env.API_KEY
 const NewsAPI = require('newsapi');
 const newsapi = new NewsAPI(apiKey);
 
+const {systemLog} = require('../logs/logHandler')
+
 //Handles calls to the news API
 module.exports.results = async (searchRequest) => {
 
-  console.log('\n**********\n', 'News request received: ', searchRequest);
+  systemLog(`News request received: ${searchRequest}` );
   let myResults = { "empty": "results" };
 
   //There are only 2 endpoints for the NewsAPI. Each takes an object with search properties.

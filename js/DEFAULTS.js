@@ -1,5 +1,5 @@
 module.exports.TOKEN_TTL = 86400; // ONE DAY
-
+module.exports.LOG_PATH = ''
 module.exports.ERROR_NEWS = {
     "status": "error",
     "totalResults": 0,

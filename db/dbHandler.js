@@ -5,42 +5,45 @@ const authenticate = require('../authenticate')
 const User = require('./models/userModel');
 const UserSetting = require('./models/userSettingModel');
 const handleError = require('../js/handleError');
+const { systemLog } = require('../logs/logHandler');
+const { sleep } = require('../js/utils');
 
 //Event handlers:
-mongoose.connection.on('connected', () => { connected = true; console.log('\n**********\nMongoDB connected') });
-mongoose.connection.on('open', () => console.log('MongoDB connection open\n**********'));
-mongoose.connection.on('disconnected', () => { connected = false; console.log('\n***Mongo DB disconnected***\n') });
-mongoose.connection.on('reconnected', () => console.log('\n---Mongo DB reconnected---\n'));
-mongoose.connection.on('disconnecting', () => console.log('\n>>>Mongo DB disconnecting<<<\n'));
-mongoose.connection.on('close', () => console.log('\nxxx Mongo DB connection closed xxx\n'));
+mongoose.connection.on('connected', () => systemLog('--Mongo DB Connected--', { consoleShow: true }));
+mongoose.connection.on('open', () => systemLog('--Mongo DB Connection *Open*--', { consoleShow: true }));
+mongoose.connection.on('disconnected', () => systemLog('xx Mongo DB Disconnected xx', { consoleShow: true }));
+mongoose.connection.on('reconnected', () => systemLog('--Mongo DB reconnected--', { consoleShow: true }));
+mongoose.connection.on('disconnecting', () => systemLog('>>Disconnecting from DB<<', { consoleShow: true }));
+mongoose.connection.on('close', () => systemLog('xx Mongo DB Connection *Closed* xx', { consoleShow: true }));
 
-//sleep timer
-const sleep = async (ms) => {
-    return new Promise((resolve) => { setTimeout(resolve, ms) })
-}
 
 
 
 
 //connect db:
 exports.connectToDatabase = async () => {
-    console.log('Mongoose state: ', mongoose.connection.readyState);
+    systemLog(`Attempting to connect to database at ${url}`, { consoleShow: true});
     let result = {};
     try {
-        if(!mongoose.connection.readyState){
-            mongoose.connect(url);
-            result = { result: 'connected', details: `Connected to database at ${url}` }
-        }else if(mongoose.connection.readyState===3){
-            await sleep(5000);
-            mongoose.connect(url);
-            result = { result: 'connected', details: `Connected to database at ${url}` }
-        } else{
+        if (mongoose.connection.readyState === 0) { //0 = not connected
+            await mongoose.connect(url);//mongoose.createConnection(url).asPromise()
+            result = { result: 'connected', details: `Connected to database at ${url}` };
 
+        } else if (mongoose.connection.readyState === 3) { //disconneting
+            await sleep(5000); //wait 5 seconds to allow database to disconnect before attempting another
+            await mongoose.connect(url);
+            result = { result: 'connected', details: `Connected to database at ${url}` };
+
+        } else { // 1 (connected) or 2 (connecting)
+            result = { result: 'connected', details: `Already connected to database at ${url}` }
         }
+        systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, 'dbHandler/connectToDatabase');
+
     } finally {
         return result;
+
     };
 };
 
@@ -49,7 +52,8 @@ exports.disconnectFromDatabase = async () => {
     let result = {};
     try {
         await mongoose.connection.close();
-        result = { result: 'disconnected', details: `Disconnected from database at ${url}` }
+        result = { result: 'disconnected', details: `Disconnected from database at ${url}` };
+        systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, 'dbHandler/disconnectFromDatabase');
     } finally {
@@ -72,7 +76,8 @@ exports.createNewUser = async (userInfo) => {
 
     try {
         const user = await User.register(new User({ username, email, displayname, notes }), password)
-        result = { result: 'success', code: 200, category:'Register',message:'Registration Successful for '+ user.username, details: 'Successfully registered user ' + user.username };
+        result = { result: 'success', code: 200, category: 'Register', message: 'Registration Successful for ' + user.username, details: 'Successfully registered user ' + user.username };
+        systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, 'dbHandler/createNewUser');
     } finally {
@@ -103,23 +108,26 @@ exports.deleteUser = async (userInfo, options = {}) => {
     let result = {};
     try {
         const res = await User.findOneAndDelete(searchObj);
-        result = res ?
-            { result: 'success', code: 200, category:'Delete',message:'User ' + res.username + ' deleted', details: res.username + ' deleted' }
-            :
-            handleError('UserDoesntExistsError', 'dbHandler/deleteUser');
+        if (res) {
+            result = { result: 'success', code: 200, category: 'Delete', message: 'User ' + res.username + ' deleted', details: res.username + ' deleted' };
+            systemLog(result.details, { consoleShow: true });
+        } else {
+            result = handleError('UserDoesntExistsError', 'dbHandler/deleteUser');
+        };
 
     } catch (err) {
         result = handleError(err, 'dbHandler/deleteUser');
     } finally {
         const allUsers = await User.find();
-        console.log('\n***\nHere are your updated users:\n', allUsers);
+        systemLog(`${allUsers.length} users left in database`, { consoleShow: true });
         return result;
     };
 };
 //changePassword:
-//...code here
+//...code goes here
+
 //editUser
-//...code here
+//...code goes here
 
 
 //-----------------
@@ -136,7 +144,8 @@ exports.createNewSettings = async (settingsInfo) => {
         const user = await UserSetting.findOne({ userId: _id })
         if (!user) {
             const res = await UserSetting.create({ userId: _id, ...rest });
-            result = { result: 'success',code: 200, category:'Settings',message:'New settings created ', data: res, details: 'created new user settings for ' + _id };
+            result = { result: 'success', code: 200, category: 'Settings', message: 'New settings created ', data: res, details: 'created new user settings for ' + _id };
+            systemLog(result.details, { consoleShow: true });
         } else {
             result = handleError('UserExistsError', 'dbHandler/createNewSettings');
         }
@@ -154,8 +163,6 @@ exports.createNewSettings = async (settingsInfo) => {
         // };
 
     } finally {
-        const allUsers = await UserSetting.find();
-        console.log('\n***\nHere are your settings:\n', allUsers);
         return result;
     };
 };
@@ -168,16 +175,14 @@ exports.updateSettings = async (settingsInfo) => {
         const res = await UserSetting.findOneAndUpdate({ userId: _id }, { ...rest }, { new: true });
         console.log('\n\n\n\n\**************Update res: ', res);
         result = res ?
-            { result: 'success',code: 200, category:'Settings',message:'Settings updated', data: res, details: 'Settings updated' }
+            { result: 'success', code: 200, category: 'Settings', message: 'Settings updated', data: res, details: res._id + ' settings updated' }
             :
             this.createNewSettings(settingsInfo);
-
+        systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, 'dbHandler/updateSettings');
 
     } finally {
-        const allUsers = await UserSetting.find();
-        console.log('\n***\nHere are your updated settings:\n', allUsers);
         return result;
     };
 
@@ -189,17 +194,21 @@ exports.deleteSettings = async (settingsInfo) => {
     let result = {};
     try {
         const res = await UserSetting.findOneAndDelete({ userId: _id });
-        result = res ?
-            { result: 'success',code: 200, category:'Settings',message:'Settings deleted ', details: _id + ' settings deleted' }
-            :
-            handleError('UserDoesntExistsError', 'dbHandler/deleteSettings');
+        if (res) {
+            result = { result: 'success', code: 200, category: 'Settings', message: 'Settings deleted ', details: _id + ' settings deleted' };
+            systemLog(result.details, { consoleShow: true });
+        } else {
+            result = handleError('UserDoesntExistsError', 'dbHandler/deleteSettings');
+
+        };
+
 
     } catch (err) {
         result = handleError(err, 'dbHandler/deleteSettings');
 
     } finally {
         const allUsers = await UserSetting.find();
-        console.log('\n***\nHere are your updated users:\n', allUsers);
+        systemLog(`${allUsers.length} left in database`, { consoleShow: true });
         return result;
     };
 
@@ -212,7 +221,8 @@ exports.getSettings = async (userInfo) => {
     try {
         const res = await UserSetting.findOne({ userId: _id });
         if (res) {
-            result = { result: 'success',code: 200, category:'Settings',message:'Settings retrieved', data: res, details: res.username + ' validated' }
+            result = { result: 'success', code: 200, category: 'Settings', message: 'Settings retrieved', data: res, details: res._id + ' settings retrieved' }
+            systemLog(result.details, { consoleShow: true });
         } else {
             result = handleError('UserDoesntExistsError', 'dbHandler/getSettings')
         };
