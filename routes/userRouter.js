@@ -11,8 +11,8 @@ const CONSOLE_SHOW = { consoleShow: true }
 //New User:
 userRouter.route('/signup')
     .post(async (req, res) => {
-        const { username, password, email, diplayname } = req.body
-        const result = await dbHandler.createNewUser({ username, email, password, diplayname });
+        const { username, password, email, displayname } = req.body
+        const result = await dbHandler.createNewUser({ username, email, password, displayname });
         const { details, ...rest } = result;
         res.statusCode = rest.code;
         res.setHeader('Content-Type', 'application/json');

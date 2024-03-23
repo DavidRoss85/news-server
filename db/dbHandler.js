@@ -73,7 +73,6 @@ exports.createNewUser = async (userInfo) => {
     if (!email) return handleError('NoEmail', 'dbHandler/createNewUser', { consoleShow: false });
 
     let result = {};
-
     try {
         const lowerCaseUsername = username.toLowerCase()
         const user = await User.register(new User({ username: lowerCaseUsername, email, displayname, notes }), password)
@@ -169,16 +168,7 @@ exports.createNewSettings = async (settingsInfo) => {
         }
 
     } catch (err) {
-        console.log('\nError creating new user settings: ');
         result = handleError(err, 'dbHandler/createNewSettings');
-        // const errMsg = `${e}`;
-        // if (errMsg.startsWith(DUPLICATE_USER_MSG)) {
-        //     console.log('SETTINGS FOR THAT USER ALREADY EXIST');
-        //     result = { result: 'error', data: DEFAULTS.DEFAULT_USER_SETTINGS, details: 'user already exists' }
-        // } else {
-        //     console.log(e)
-        //     result = { result: 'error', data: DEFAULTS.DEFAULT_USER_SETTINGS, details: errMsg }
-        // };
 
     } finally {
         return result;
@@ -190,8 +180,7 @@ exports.updateSettings = async (settingsInfo) => {
     if (!settingsInfo || !_id || (settingsInfo instanceof Object !== true)) return handleError('InvalidDataError', 'dbHandler/updateSettings');
     let result = {};
     try {
-        const res = await UserSetting.findOneAndUpdate({ userId: _id }, { ...rest }, { new: true });
-        console.log('\n\n\n\n\**************Update res: ', res);
+        const res = await UserSetting.findOneAndUpdate({ userId: _id }, rest, { new: true });
         result = res ?
             { result: 'success', code: 200, category: 'Settings', message: 'Settings updated', data: res, details: res._id + ' settings updated' }
             :
