@@ -22,7 +22,7 @@ mongoose.connection.on('close', () => systemLog('xx Mongo DB Connection *Closed*
 
 //connect db:
 exports.connectToDatabase = async () => {
-    systemLog(`Attempting to connect to database at ${url}`, { consoleShow: true});
+    systemLog(`Attempting to connect to database at ${url}`, { consoleShow: true });
     let result = {};
     try {
         if (mongoose.connection.readyState === 0) { //0 = not connected
@@ -73,10 +73,10 @@ exports.createNewUser = async (userInfo) => {
     if (!email) return handleError('NoEmail', 'dbHandler/createNewUser', { consoleShow: false });
 
     let result = {};
-    
+
     try {
         const lowerCaseUsername = username.toLowerCase()
-        const user = await User.register(new User({ username:lowerCaseUsername, email, displayname, notes }), password)
+        const user = await User.register(new User({ username: lowerCaseUsername, email, displayname, notes }), password)
         result = { result: 'success', code: 200, category: 'Register', message: 'Registration Successful for ' + user.username, details: 'Successfully registered user ' + user.username };
         systemLog(result.details, { consoleShow: true });
     } catch (err) {
@@ -123,6 +123,23 @@ exports.deleteUser = async (userInfo, options = {}) => {
         systemLog(`${allUsers.length} users left in database`, { consoleShow: true });
         return result;
     };
+};
+//Check if user exists
+module.exports.queryUsername = async (username) => {
+    if (!username) return handleError('NoUserName', 'dbHandler/queryUsername', { consoleShow: false });
+
+    let result = {}
+    try {
+        const lowerCaseUsername = username.toLowerCase()
+        const res = await User.findOne({ username: lowerCaseUsername});
+        result = res ? { result: false, code: 200, category: 'Username search', message: 'Username unavailable' }
+            :
+            { result: true, code: 200, category: 'Username search', message: 'Username available' };
+    } catch (err) {
+        result = handleError(err, 'dbHandler/queryUsername');
+    } finally {
+        return result;
+    }
 };
 //changePassword:
 //...code goes here
@@ -225,7 +242,7 @@ exports.getSettings = async (userInfo) => {
             result = { result: 'success', code: 200, category: 'Settings', message: 'Settings retrieved', data: res, details: res._id + ' settings retrieved' }
             systemLog(result.details, { consoleShow: true });
         } else {
-            result = handleError('UserDoesntExistsError', 'dbHandler/getSettings')
+            result = handleError('UserSettingsDoesntExistsError', 'dbHandler/getSettings')
         };
 
     } catch (err) {

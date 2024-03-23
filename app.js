@@ -55,7 +55,7 @@ app.use((req, res, next) => {
   res.appendHeader('Access-Control-Allow-Origin', '*');
   res.appendHeader('Access-Control-Allow-Credentials', 'true');
   res.appendHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.appendHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  res.appendHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
   next();
 });
 

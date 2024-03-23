@@ -6,7 +6,7 @@ const passport = require('passport');
 const handleError = require('../js/handleError');
 const { systemLog } = require('../logs/logHandler');
 
-const CONSOLE_SHOW ={consoleShow:true}
+const CONSOLE_SHOW = { consoleShow: true }
 
 //New User:
 userRouter.route('/signup')
@@ -22,10 +22,10 @@ userRouter.route('/signup')
 
 //Login:
 userRouter.post('/login', (req, res, next) => {
-   systemLog('Received post at /login',{message: req.body.username, ...CONSOLE_SHOW});
+    systemLog('Received post at /login', { message: req.body.username, ...CONSOLE_SHOW });
     req.body.username = req.body.username.toLowerCase();
     passport.authenticate('local', (err, user, info) => {
-       systemLog('Attempting to authenticate login',{message:'', ...CONSOLE_SHOW});
+        systemLog('Attempting to authenticate login', { message: '', ...CONSOLE_SHOW });
         if (err) {
             const result = handleError(err, 'userRouter/post/login');
             const { details, ...rest } = result;
@@ -43,7 +43,7 @@ userRouter.post('/login', (req, res, next) => {
             return;
         }
         if (user) {
-            systemLog('Login success',{message: user.username, ...CONSOLE_SHOW});
+            systemLog('Login success', { message: user.username, ...CONSOLE_SHOW });
             const token = authenticate.getToken({ _id: user._id });
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
@@ -72,7 +72,7 @@ userRouter.route('/settings')
         })
     .put(authenticate.verifyUser,
         async (req, res) => {
-            systemLog('Received a put request at /settings', {message: req.body, ...CONSOLE_SHOW})
+            systemLog('Received a put request at /settings', { message: req.body, ...CONSOLE_SHOW })
             if (req.user.admin === true) {
                 //Do admin only process:
             }
@@ -107,7 +107,7 @@ userRouter.route('/settings/:userId')
         })
     .put(authenticate.verifyUser,
         async (req, res) => {
-            systemLog('Received a put request at /settings/' + req.params.userId, {message: req.body, ...CONSOLE_SHOW})
+            systemLog('Received a put request at /settings/' + req.params.userId, { message: req.body, ...CONSOLE_SHOW })
             if (`${req.user._id}` === `${req.params.userId}` || req.user.admin === true) {
                 //if admin or same id:
                 const result = await dbHandler.updateSettings({ _id: req.params.userId, ...req.body.data });
@@ -125,16 +125,21 @@ userRouter.route('/settings/:userId')
                 return;
             };
         })
+//checks to see if a username is available
+userRouter.get('/queryusername/:username', async (req, res) => {
+    const result = await dbHandler.queryUsername(req.params.username);
+    const { details, ...rest } = result;
+    console.log('rest: ', rest)
+    res.statusCode = rest.code;
+    res.setHeader('Content-Type', 'application/json');
+    res.json(rest);
+    return;
+});
 
 userRouter.route('/test')
-.get((req,res)=>{
-    if(req.cookies){
-        res.json({message:'There are cookies',cookies: req.cookies})
-    
-    }else{
-        res.json({message:'There are no cookies'})
-    }
-})
+    .get((req, res) => {
+        res.json({ message: 'The server is active' })
+    })
 
 //Not required with token verification
 // userRouter.route('/logout')

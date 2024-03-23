@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const logHandler= require('../logs/logHandler');
+const logHandler = require('../logs/logHandler');
 
 const handleError = (err, moduleName, options = {}) => {
-    if(typeof err ==='string'){
-        err = {name: err};
+    if (typeof err === 'string') {
+        err = { name: err };
     };
     const {
         logFile = true,
@@ -26,16 +26,16 @@ const handleError = (err, moduleName, options = {}) => {
     // Reason: ${err.reason || null}
     // <<<<<Error>>>>>\n${err}`
     //System Log
-   
-   
-        // if (consoleShow) {
-    
-        //     console.error(`\n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>`);
-        //     console.log(`Details:\nName: ${err.name || null}`);
-        //     console.log('Reason: ', err.reason || null);
-        //     console.log(`<<<<<Error>>>>>\n${err}`);
-        // };
-    
+
+
+    // if (consoleShow) {
+
+    //     console.error(`\n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>`);
+    //     console.log(`Details:\nName: ${err.name || null}`);
+    //     console.log('Reason: ', err.reason || null);
+    //     console.log(`<<<<<Error>>>>>\n${err}`);
+    // };
+
     //Console log the error
 
     //Specify error messages...
@@ -86,6 +86,11 @@ const handleError = (err, moduleName, options = {}) => {
             server.category = 'Database Conflict';
             server.message = 'Could not locate the specified user';
             break;
+        case 'UserSettingsDoesntExistsError':
+            server.code = 404;
+            server.category = 'Database Conflict';
+            server.message = 'No user settings saved in database';
+            break;
         case 'IncorrectUsernameError':
             server.code = 401;
             server.category = 'Login Error';
@@ -117,16 +122,16 @@ const handleError = (err, moduleName, options = {}) => {
     };
 
 
-    logHandler.systemLog(err,{
-        isErr:true,
-        consoleShow: consoleShow, 
+    logHandler.systemLog(err, {
+        isErr: true,
+        consoleShow: consoleShow,
         message: `${message},${server.message},${err.message}`,
         moduleName,
         logFile
     })
 
     //return error object
-    return { result: 'error', details: err,  ...server  };
+    return { result: 'error', details: err, ...server };
 };
 
 
