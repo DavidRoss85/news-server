@@ -1,16 +1,18 @@
-#Welcome to the Server for the News Feed web app
+# Welcome to the Server for the News Feed web app
 
-#Notes:
-Have the following variables ready in your .env file:
+## Notes:
+1. Have the following variables ready in your .env file:
  - API_KEY 
  - SECRET_KEY
+ - MONGO_LOCAL_URL
 
-This server uses MongoDB to access and store information about the user.
-Please be sure to have a MongoDB server installed and running or available at the URL
+2. This server uses MongoDB to access and store information about the user.
+Please be sure to have a MongoDB server installed and running or available at the MONGO_LOCAL_URL
 
-This server also uses the News API to fetch news results and return to the user. An API key is required.
-One can be obtained at https://newsapi.org/
+3. This server also uses [The News API](https://newsapi.org/) to fetch news results and return to the user. An API key is required.
+One can be obtained at [https://newsapi.org/](https://newsapi.org/)
 
-This will by default run on port 8080 unless changed in /bin/www
+4. The server will by default run on port 8080 unless changed in /bin/www
+use *npm start* for normal operation or *npm run gstart* for google-cloud functions framework
 
-logHandler.js will try to write logs to /logs/system.log
+5. logHandler.js will try to write logs to /logs/system.log
