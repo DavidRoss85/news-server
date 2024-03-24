@@ -20,23 +20,6 @@ const handleError = (err, moduleName, options = {}) => {
         category,
         message,
     };
-    // const logMessage = `
-    // \n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>
-    // Details:\nName: ${err.name || null}
-    // Reason: ${err.reason || null}
-    // <<<<<Error>>>>>\n${err}`
-    //System Log
-
-
-    // if (consoleShow) {
-
-    //     console.error(`\n<<<<<\nAn Error occured in ${moduleName || 'an unspecified module'}>>>>>`);
-    //     console.log(`Details:\nName: ${err.name || null}`);
-    //     console.log('Reason: ', err.reason || null);
-    //     console.log(`<<<<<Error>>>>>\n${err}`);
-    // };
-
-    //Console log the error
 
     //Specify error messages...
     //Since mongodb, mongoose and passport don't seem to return consistent errors/messages,

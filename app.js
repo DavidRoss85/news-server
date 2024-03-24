@@ -85,5 +85,5 @@ app.use((err, req, res, next) => {
   res.render('error');
 });
 
-module.exports.newsFeedServer = app;
-// module.exports = app;
+// module.exports.newsFeedServer = app;
+module.exports = app;
