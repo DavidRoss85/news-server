@@ -9,6 +9,7 @@ const dbHandler = require('./db/dbHandler');
 const { systemLog } = require('./logs/logHandler')
 const { sleep } = require('./js/utils');
 
+const {cors, corsWithOptions} = require('./routes/corsModule');
 const indexRouter = require('./routes/indexRouter');
 const newsRouter = require('./routes/newsRouter');
 const userRouter = require('./routes/userRouter');
@@ -21,6 +22,19 @@ sleep(500) //wait half a second to begin
     systemLog('\n\n************\n************\nBEGIN SERVER\n************\n************', { consoleShow: true, logFile: false, lineBreak: '<none>' })
     dbHandler.connectToDatabase();
   });
+
+
+// Secure traffic only
+// app.route('*')
+//   // .options(corsWithOptions, (req, res) => res.sendStatus(200))
+//   .all(cors,(req, res, next) => {
+//     if (req.secure) {
+//       return next();
+//     } else {
+//       console.log(`Redirecting to: https://${req.hostname}:${app.get('secPort')}${req.url}`);
+//       res.redirect(301, `https://${req.hostname}:${app.get('secPort')}${req.url}`);
+//     }
+//   });
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
