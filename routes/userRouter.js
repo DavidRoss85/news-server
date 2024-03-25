@@ -5,12 +5,14 @@ const authenticate = require('../authenticate');
 const passport = require('passport');
 const handleError = require('../js/handleError');
 const { systemLog } = require('../logs/logHandler');
+const { cors, corsWithOptions } = require('./corsModule');
 
 const CONSOLE_SHOW = { consoleShow: true }
 
 //New User:
 userRouter.route('/signup')
-    .post(async (req, res) => {
+    .options(corsWithOptions, (req, res) => res.sendStatus(200))
+    .post(cors, async (req, res) => {
         const { username, password, email, displayname } = req.body
         const result = await dbHandler.createNewUser({ username, email, password, displayname });
         const { details, ...rest } = result;
@@ -21,43 +23,46 @@ userRouter.route('/signup')
     });
 
 //Login:
-userRouter.post('/login', (req, res, next) => {
-    systemLog('Received post at /login', { message: req.body.username, ...CONSOLE_SHOW });
-    req.body.username = req.body.username.toLowerCase();
-    passport.authenticate('local', (err, user, info) => {
-        systemLog('Attempting to authenticate login', { message: '', ...CONSOLE_SHOW });
-        if (err) {
-            const result = handleError(err, 'userRouter/post/login');
-            const { details, ...rest } = result;
-            res.statusCode = rest.code;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(rest);
-            return;
-        }
-        if (!user) {
-            const result = handleError(info, 'userRouter/post/login');
-            const { details, ...rest } = result;
-            res.statusCode = rest.code;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(rest);
-            return;
-        }
-        if (user) {
-            systemLog('Login success', { message: user.username, ...CONSOLE_SHOW });
-            const token = authenticate.getToken({ _id: user._id });
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            const { username, displayname } = user;
-            // res.cookie('jwtNsLogin', token, { httpOnly: true })
-            res.json({ result: 'success', validated: true, accessToken: token, username, displayname, details: user.username + ' validated', });
-            return;
-        }
-    })(req, res, next);
-});
+userRouter.route('/login')
+    .options(corsWithOptions, (req, res) => res.sendStatus(200))
+    .post(cors, (req, res, next) => {
+        systemLog('Received post at /login', { message: req.body.username, ...CONSOLE_SHOW });
+        req.body.username = req.body.username.toLowerCase();
+        passport.authenticate('local', (err, user, info) => {
+            systemLog('Attempting to authenticate login', { message: '', ...CONSOLE_SHOW });
+            if (err) {
+                const result = handleError(err, 'userRouter/post/login');
+                const { details, ...rest } = result;
+                res.statusCode = rest.code;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(rest);
+                return;
+            }
+            if (!user) {
+                const result = handleError(info, 'userRouter/post/login');
+                const { details, ...rest } = result;
+                res.statusCode = rest.code;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(rest);
+                return;
+            }
+            if (user) {
+                systemLog('Login success', { message: user.username, ...CONSOLE_SHOW });
+                const token = authenticate.getToken({ _id: user._id });
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                const { username, displayname } = user;
+                // res.cookie('jwtNsLogin', token, { httpOnly: true })
+                res.json({ result: 'success', validated: true, accessToken: token, username, displayname, details: user.username + ' validated', });
+                return;
+            }
+        })(req, res, next);
+    });
 
 //Operations user settings:
 userRouter.route('/settings')
-    .get(authenticate.verifyUser,
+    .options(corsWithOptions, (req, res) => res.sendStatus(200))
+    .get(cors, authenticate.verifyUser,
         async (req, res, next) => {
             if (req.user.admin === true) {
                 //Do admin only process:
@@ -70,7 +75,7 @@ userRouter.route('/settings')
             res.json(rest);
             return;
         })
-    .put(authenticate.verifyUser,
+    .put(cors, authenticate.verifyUser,
         async (req, res) => {
             systemLog('Received a put request at /settings', { message: req.body, ...CONSOLE_SHOW })
             if (req.user.admin === true) {
@@ -86,7 +91,8 @@ userRouter.route('/settings')
         })
 
 userRouter.route('/settings/:userId')
-    .get(authenticate.verifyUser,
+    .options(corsWithOptions, (req, res) => res.sendStatus(200))
+    .get(cors, authenticate.verifyUser,
         async (req, res, next) => {
             if (`${req.user._id}` === `${req.params.userId}` || req.user.admin === true) {
                 //No admin only access same id:
@@ -105,7 +111,7 @@ userRouter.route('/settings/:userId')
                 return;
             };
         })
-    .put(authenticate.verifyUser,
+    .put(cors, authenticate.verifyUser,
         async (req, res) => {
             systemLog('Received a put request at /settings/' + req.params.userId, { message: req.body, ...CONSOLE_SHOW })
             if (`${req.user._id}` === `${req.params.userId}` || req.user.admin === true) {
@@ -126,18 +132,21 @@ userRouter.route('/settings/:userId')
             };
         })
 //checks to see if a username is available
-userRouter.get('/queryusername/:username', async (req, res) => {
-    const result = await dbHandler.queryUsername(req.params.username);
-    const { details, ...rest } = result;
-    console.log('rest: ', rest)
-    res.statusCode = rest.code;
-    res.setHeader('Content-Type', 'application/json');
-    res.json(rest);
-    return;
-});
+userRouter.route('/queryusername/:username')
+    .options(corsWithOptions, (req, res) => res.sendStatus(200))
+    .get(cors, async (req, res) => {
+        const result = await dbHandler.queryUsername(req.params.username);
+        const { details, ...rest } = result;
+        // console.log('rest: ', rest)
+        res.statusCode = rest.code;
+        res.setHeader('Content-Type', 'application/json');
+        res.json(rest);
+        return;
+    });
 
 userRouter.route('/test')
-    .get((req, res) => {
+    .options(corsWithOptions, (req, res) => res.sendStatus(200))
+    .get(cors, (req, res) => {
         res.json({ message: 'The server is active' })
     })
 

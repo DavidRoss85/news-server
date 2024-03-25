@@ -2,20 +2,13 @@ const DEFAULTS = require('../js/DEFAULTS')
 const myNews = require('../js/newsAPI')
 const express = require('express');
 const newsRouter = express.Router();
+const { cors, corsWithOptions } = require('./corsModule');
 
 
 newsRouter.use(express.json());
 newsRouter.route('/')
-    // .all((req, res, next) => {
-    //     res.statusCode = 200;
-    //     res.setHeader('Content-Type', 'application/json')
-    //     res.appendHeader('Access-Control-Allow-Origin', '*');
-    //     res.appendHeader('Access-Control-Allow-Credentials', 'true');
-    //     res.appendHeader('Access-Control-Allow-Methods', '*');
-    //     res.appendHeader('Access-Control-Allow-Headers', '*')
-    //     next();
-    // })
-    .post(async (req, res) => {
+    .options(corsWithOptions, (req, res) => res.sendStatus(200))
+    .post(cors, async (req, res) => {
 
         console.log('\n***\nRecieved a post request', JSON.stringify(req.body));
 
