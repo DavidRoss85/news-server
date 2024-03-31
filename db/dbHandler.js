@@ -248,6 +248,10 @@ exports.getSettings = async (userInfo) => {
 
 };
 
+exports.getMongoStatus = async ()=>{
+    return {connectionStatus: mongoose.connection.readyState}
+}
+
 const ensureConnection = async () => {
     try {
         if (mongoose.connection.readyState === 0) { //0 = not connected

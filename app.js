@@ -12,6 +12,7 @@ const { sleep } = require('./js/utils');
 const indexRouter = require('./routes/indexRouter');
 const newsRouter = require('./routes/newsRouter');
 const userRouter = require('./routes/userRouter');
+const testingRouter = require('./routes/testingRouter');
 
 const app = express();
 
@@ -39,6 +40,7 @@ app.use(passport.initialize());
 app.use('/', indexRouter);
 app.use('/news', newsRouter);
 app.use('/users', userRouter);
+app.use('/test', testingRouter);
 // app.use('/login',loginRouter);
 
 
