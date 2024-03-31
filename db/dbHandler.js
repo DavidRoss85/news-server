@@ -73,6 +73,7 @@ exports.createNewUser = async (userInfo) => {
     if (!email) return handleError('NoEmail', 'dbHandler/createNewUser', { consoleShow: false });
 
     let result = {};
+    await ensureConnection();
     try {
         const lowerCaseUsername = username.toLowerCase()
         const user = await User.register(new User({ username: lowerCaseUsername, email, displayname, notes }), password)
@@ -106,6 +107,7 @@ exports.deleteUser = async (userInfo, options = {}) => {
     };
 
     let result = {};
+    await ensureConnection();
     try {
         const res = await User.findOneAndDelete(searchObj);
         if (res) {
@@ -130,7 +132,7 @@ module.exports.queryUsername = async (username) => {
     let result = {}
     try {
         const lowerCaseUsername = username.toLowerCase()
-        const res = await User.findOne({ username: lowerCaseUsername});
+        const res = await User.findOne({ username: lowerCaseUsername });
         result = res ? { result: false, code: 200, category: 'Username search', message: 'Username unavailable' }
             :
             { result: true, code: 200, category: 'Username search', message: 'Username available' };
@@ -157,6 +159,7 @@ exports.createNewSettings = async (settingsInfo) => {
     if (!_id || !settingsInfo || (settingsInfo instanceof Object !== true)) return handleError('InvalidDataError', 'dbHandler/createNewSettings');
 
     let result = {};
+    await ensureConnection();
     try {
         const user = await UserSetting.findOne({ userId: _id })
         if (!user) {
@@ -179,6 +182,7 @@ exports.updateSettings = async (settingsInfo) => {
     const { _id, ...rest } = settingsInfo;
     if (!settingsInfo || !_id || (settingsInfo instanceof Object !== true)) return handleError('InvalidDataError', 'dbHandler/updateSettings');
     let result = {};
+    await ensureConnection();
     try {
         const res = await UserSetting.findOneAndUpdate({ userId: _id }, rest, { new: true });
         result = res ?
@@ -225,6 +229,7 @@ exports.getSettings = async (userInfo) => {
     const { _id } = userInfo;
     if (!_id) return handleError('InvalidDataError', 'dbHandler/getSettings');
     let result = {};
+    await ensureConnection();
     try {
         const res = await UserSetting.findOne({ userId: _id });
         if (res) {
@@ -241,4 +246,15 @@ exports.getSettings = async (userInfo) => {
         return result;
     };
 
+};
+
+const ensureConnection = async () => {
+    try {
+        if (mongoose.connection.readyState === 0) { //0 = not connected
+            await this.connectToDatabase()
+        }
+    } catch (err) {
+        result = handleError(err, 'dbHandler/connectToDatabase');
+
+    };
 };

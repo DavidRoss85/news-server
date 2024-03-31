@@ -5,7 +5,7 @@ const authenticate = require('../authenticate');
 const passport = require('passport');
 const handleError = require('../js/handleError');
 const { systemLog } = require('../logs/logHandler');
-const { corsWithOptions } = require('./corsModule');
+const { cors, corsWithOptions } = require('./corsModule');
 
 const CONSOLE_SHOW = { consoleShow: true }
 
@@ -146,7 +146,7 @@ userRouter.route('/queryusername/:username')
 
 userRouter.route('/test')
     .options(corsWithOptions, (req, res) => res.sendStatus(200))
-    .get(corsWithOptions, (req, res) => {
+    .get(cors, (req, res) => {
         res.json({ message: 'The server is active' })
     })
 

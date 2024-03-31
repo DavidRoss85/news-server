@@ -35,13 +35,14 @@ module.exports.systemLog = (event, options = {}) => {
         const logEntry = `${Date.now()},${isErr ? 'Error' : 'Event'},${event},${message}\n`
         //Time, Type, Err, Display
 
-        fs.appendFile(systemFile, logEntry, err => {
-            if (err) {
-                console.error(err);
-            } else {
-                return { result: 'success', details: 'Successfully logged event/err' }
-            };
-        });
+        console.log(logEntry);
+        // fs.appendFile(systemFile, logEntry, err => {
+        //     if (err) {
+        //         console.error(err);
+        //     } else {
+        //         return { result: 'success', details: 'Successfully logged event/err' }
+        //     };
+        // });
     };
     return { result: 'failed', details: 'No log made' };
 }

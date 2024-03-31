@@ -16,9 +16,9 @@ const fs = require('fs');
 const port = normalizePort(process.env.PORT || '8080');
 app.set('port', port);
 const server = http.createServer(app);
-server.listen(app.get('port'),()=>{
-  console.log('HTTP listening on port:',app.get('port'))
-});
+// server.listen(app.get('port'),()=>{
+//   console.log('HTTP listening on port:',app.get('port'))
+// });
 
 
 /**

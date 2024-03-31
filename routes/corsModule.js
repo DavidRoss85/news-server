@@ -1,8 +1,11 @@
 const { systemLog } = require('../logs/logHandler');
 const cors = require('cors');
+// const localHost = process.env.LOCAL_HOST_URL;
+// const localHostSecure = process.env.LOCAL_HOST_SECURE;
 const serverLocation = process.env.SERVER_LOCATION;
 const clientLocation = process.env.CLIENT_LOCATION;
-const whitelist = ['http://localhost:3000', 'https://localhost:3443',serverLocation, clientLocation];
+
+const whitelist = [ serverLocation, clientLocation];
 
 
 const corsOptionsDelegate = (req, cb) => {
