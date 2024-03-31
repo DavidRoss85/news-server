@@ -1,4 +1,4 @@
-const url = process.env.MONGO_LOCAL_URL //'mongodb://127.0.0.1:27017/newsFeedData';
+const url = process.env.MONGO_SERVER_URL //'mongodb://127.0.0.1:27017/newsFeedData';
 const mongoose = require('mongoose');
 const passport = require('passport');
 const authenticate = require('../authenticate')

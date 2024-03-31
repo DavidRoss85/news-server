@@ -2,13 +2,13 @@ const DEFAULTS = require('../js/DEFAULTS')
 const myNews = require('../js/newsAPI')
 const express = require('express');
 const newsRouter = express.Router();
-const { cors, corsWithOptions } = require('./corsModule');
+const { corsWithOptions } = require('./corsModule');
 
 
 newsRouter.use(express.json());
 newsRouter.route('/')
     .options(corsWithOptions, (req, res) => res.sendStatus(200))
-    .post(cors, async (req, res) => {
+    .post(corsWithOptions, async (req, res) => {
 
         console.log('\n***\nRecieved a post request', JSON.stringify(req.body));
 

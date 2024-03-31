@@ -4,12 +4,12 @@
 1. **Have the following variables ready in your .env file:**
  - API_KEY 
  - SECRET_KEY
- - MONGO_LOCAL_URL
+ - MONGO_SERVER_URL
  - PORT
  - SEC_PORT
 
 2. **This server uses MongoDB to access and store information about the user.**
-Please be sure to have a MongoDB server installed and running or available at the MONGO_LOCAL_URL
+Please be sure to have a MongoDB server installed and running or available at the MONGO_SERVER_URL
 
 3. **This server uses [The News API](https://newsapi.org/) to fetch news results and return to the user.  API_KEY is required.**
 One can be obtained at [https://newsapi.org/]

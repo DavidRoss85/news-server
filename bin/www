@@ -9,45 +9,41 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 
-/**
- * Get port from environment and store in Express.
- */
-const port = normalizePort(process.env.PORT || '8080');
-const secPort = normalizePort(process.env.SEC_PORT || '8523');
-
-app.set('port', port);
-app.set('secPort', secPort)
 
 /**
  * Create HTTP server.
  */
+const port = normalizePort(process.env.PORT || '8080');
+app.set('port', port);
 const server = http.createServer(app);
-/**
- * Create HTTPS server
- */
-const options ={
-  key: fs.readFileSync(__dirname+'/server.key'),
-  cert: fs.readFileSync(__dirname+'/server.cert')
-};
-const secureServer = https.createServer(options,app);
-/**
- * Listen on provided port, on all network interfaces.
- */
 server.listen(app.get('port'),()=>{
   console.log('HTTP listening on port:',app.get('port'))
 });
-secureServer.listen(app.get('secPort'),()=>{
-  console.log('HTTPS listening on port:', app.get('secPort'));
-});
+
+
+/**
+ * Create HTTPS server
+ */
+// const secPort = normalizePort(process.env.SEC_PORT || '8523');
+// app.set('secPort', secPort)
+// const options ={
+//   key: fs.readFileSync(__dirname+'/server.key'),
+//   cert: fs.readFileSync(__dirname+'/server.cert')
+// };
+// const secureServer = https.createServer(options,app);
+// secureServer.listen(app.get('secPort'),()=>{
+//   console.log('HTTPS listening on port:', app.get('secPort'));
+// });
+// secureServer.on('error', onError);
+// secureServer.on('listening', onListening);
+
+
 
 /**
 *Set handlers
 */
 server.on('error', onError);
-secureServer.on('error', onError);
-
 server.on('listening', onListening);
-secureServer.on('listening', onListening);
 
 
 /**
