@@ -8,6 +8,7 @@ const passport = require('passport');
 const dbHandler = require('./db/dbHandler');
 const { systemLog } = require('./logs/logHandler')
 const { sleep } = require('./js/utils');
+const {testCache} = require('./js/test');
 
 const indexRouter = require('./routes/indexRouter');
 const newsRouter = require('./routes/newsRouter');
@@ -23,6 +24,7 @@ sleep(500) //wait half a second to begin
     dbHandler.connectToDatabase();
   });
 
+  testCache();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
