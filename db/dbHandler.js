@@ -22,20 +22,20 @@ mongoose.connection.on('close', () => systemLog('xx Mongo DB Connection *Closed*
 
 //connect db:
 exports.connectToDatabase = async () => {
-    systemLog(`Attempting to connect to database at ${url}`, { consoleShow: true });
+    systemLog(`Attempting to connect to database`, { consoleShow: true });
     let result = {};
     try {
         if (mongoose.connection.readyState === 0) { //0 = not connected
             await mongoose.connect(url);//mongoose.createConnection(url).asPromise()
-            result = { result: 'connected', details: `Connected to database at ${url}` };
+            result = { result: 'connected', details: `Connected to database` };
 
         } else if (mongoose.connection.readyState === 3) { //disconneting
             await sleep(5000); //wait 5 seconds to allow database to disconnect before attempting another
             await mongoose.connect(url);
-            result = { result: 'connected', details: `Connected to database at ${url}` };
+            result = { result: 'connected', details: `Connected to database` };
 
         } else { // 1 (connected) or 2 (connecting)
-            result = { result: 'connected', details: `Already connected to database at ${url}` }
+            result = { result: 'connected', details: `Already connected to database` }
         }
         systemLog(result.details, { consoleShow: true });
     } catch (err) {
