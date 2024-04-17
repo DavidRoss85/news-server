@@ -3,23 +3,37 @@ const apiKey = process.env.API_KEY
 const NewsAPI = require('newsapi');
 const newsapi = new NewsAPI(apiKey);
 
-const {systemLog} = require('../logs/logHandler')
+const { systemLog } = require('../logs/logHandler');
+const { writeCache, checkCache } = require('./cacheHandler');
+const { buildNewsURL } = require('./utils');
 
 //Handles calls to the news API
 module.exports.results = async (searchRequest) => {
 
-  systemLog(`News request received: ${searchRequest}` );
+  systemLog(`News request received: ${searchRequest}`);
   let myResults = { "empty": "results" };
+  const searchText = buildNewsURL(searchRequest);
+  const cachedResult = await checkCache(searchText);
 
-  //There are only 2 endpoints for the NewsAPI. Each takes an object with search properties.
-  //See notes below
-  if (searchRequest.endpoint === 'top-headlines') {
-    myResults = await newsapi.v2.topHeadlines({ ...buildRequestObj(searchRequest) });
+  if (!cachedResult) {
+    console.log('\nNothing in Cache\n')
+    //There are only 2 endpoints for the NewsAPI. Each takes an object with search properties.
+    //See notes below
+    if (searchRequest.endpoint === 'top-headlines') {
+      myResults = await newsapi.v2.topHeadlines({ ...buildRequestObj(searchRequest) });
 
-  } else if (searchRequest.endpoint === 'everything') {
-    myResults = await newsapi.v2.everything({ ...buildRequestObj(searchRequest) });
+    } else if (searchRequest.endpoint === 'everything') {
+      myResults = await newsapi.v2.everything({ ...buildRequestObj(searchRequest) });
 
-  };
+    };
+    console.log('**Writing to cache**\nkey: '+ searchText)
+    writeCache(searchText, myResults);
+
+  } else {
+    console.log('Loading from cache: ')
+    myResults = cachedResult
+  }
+
   return myResults;
 };
 
