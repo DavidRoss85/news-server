@@ -35,16 +35,17 @@ module.exports.systemLog = (event, options = {}) => {
     };
     if (logFile) {
         const logEntry = `${Date.now()},${isErr ? 'Error' : 'Event'},${event},${message}\n`
+        const shortEntry = `${event}: ${message}`
         //Time, Type, Err, Display
-
-        // console.log(logEntry);
-        fs.appendFile(systemFile, logEntry, err => {
-            if (err) {
-                console.error(err);
-            } else {
-                return { result: 'success', details: 'Successfully logged event/err' }
-            };
-        });
+        //need to rewrite since cloud functions are stateless
+        console.log(shortEntry);
+        // fs.appendFile(systemFile, logEntry, err => {
+        //     if (err) {
+        //         console.error(err);
+        //     } else {
+        //         return { result: 'success', details: 'Successfully logged event/err' }
+        //     };
+        // });
     };
     return { result: 'failed', details: 'No log made' };
 }

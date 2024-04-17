@@ -4,10 +4,12 @@ const NewsAPI = require('newsapi');
 const newsapi = new NewsAPI(apiKey);
 
 // const { systemLog } = require('../logs/logHandler');
-const { writeCache, checkCache, setLimit,checkLimit } = require('./redisClient');
+const { writeCache, checkCache, setLimit, checkLimit } = require('./redisClient');
 const { buildNewsURL } = require('./utils');
 const handleError = require('./handleError');
 const { ERROR_NEWS } = require('./DEFAULTS')
+const LIMIT_MESSAGE = 'Server limit reached. Please come back in 24hrs...'
+
 
 //Handles calls to the news API
 module.exports.results = async (searchRequest) => {
@@ -17,11 +19,17 @@ module.exports.results = async (searchRequest) => {
   const searchText = buildNewsURL(searchRequest);
   const cachedResult = await checkCache(searchText);
 
+  //Check Cache
   if (!cachedResult) {
     const timeLeft = await checkLimit();
-    if(timeLeft!=='none'){
-      throw 'Time left till requests can be made: ' + timeLeft + 'ms'
+    //If request limit reached:
+    if (timeLeft !== 'none') {
+      myResults = { ...ERROR_NEWS, message: LIMIT_MESSAGE };
+      console.log('Time left till requests can be made: ' + timeLeft + 'ms');
+      return myResults;
     }
+
+
     console.log('Requesting from server...')
     //There are only 2 endpoints for the NewsAPI. Each takes an object with search properties.
     //See notes below
@@ -37,16 +45,21 @@ module.exports.results = async (searchRequest) => {
       writeCache(searchText, myResults);
 
     } catch (err) {
-      if (err.name==='NewsAPIError: rateLimited'){
+
+      //If NewsAPI throws a 'Too many requests' error:
+      if (err.name === 'NewsAPIError: rateLimited') {
         await setLimit()
-        console.log('Feed Limit reached')
+        console.log('Feed Limit reached');
+        myResults = { ...ERROR_NEWS, message: LIMIT_MESSAGE}
       }else{
         handleError(err, 'newsAPI/results');
+        myResults = ERROR_NEWS;
       }
 
-      myResults = ERROR_NEWS
+
     }
   } else {
+    //Found in cache:
     console.log('**Loading from cache**\nkey: ' + searchText)
     myResults = cachedResult
   }

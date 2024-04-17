@@ -30,12 +30,12 @@ testingRouter.route('/dbconnectionstatus')
 
 testingRouter.route('/writeCache')
     .options(corsWithOptions, (req, res) => res.sendStatus(200))
-    .get(cors,
+    .get(cors, authenticate.verifyUser,
         async (req, res) => {
-            // if (!req.user.admin) {
-            //     rejectUser();
-            //     return;
-            // }
+            if (!req.user.admin) {
+                rejectUser();
+                return;
+            }
             cacheHandler.writeCache('MyEntry', 'MyData!!')
             const result = { test: 'success' }
             res.statusCode = 200

@@ -4,6 +4,7 @@ module.exports.LOG_PATH = '';
 module.exports.CACHE_BAN_TIME = 'BANNED_TIME';
 module.exports.ERROR_NEWS = {
     "status": "error",
+    "message": "error",
     "totalResults": 0,
     "articles": [
         {

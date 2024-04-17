@@ -20,13 +20,13 @@ newsRouter.route('/')
             } else {
                 //Add an error return object here:
                 res.statusCode = 403;
-                res.json(DEFAULTS.ERROR_NEWS);
+                res.json({ ...DEFAULTS.ERROR_NEWS, message: 'Invalid search request to server' });
 
             }
             return;
         }
         res.statusCode = 403;
-        res.json(DEFAULTS.ERROR_NEWS);
+        res.json({ ...DEFAULTS.ERROR_NEWS, message: 'Invalid request' });
     });
 
 module.exports = newsRouter;
