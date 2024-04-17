@@ -70,7 +70,7 @@ module.exports.importCache = async (saveOld = false) => {
         // console.log('Whats in the cache:', cache.exportJson())
 
     } catch (err) {
-        if (err.errno === -4058 && err.code === 'ENOENT') {
+        if (err.code === 'ENOENT') {
             //File does not exist:
             fs.writeFile(cacheLog, '{}', err => {
                 if (err) {
