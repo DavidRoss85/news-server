@@ -4,7 +4,7 @@ const os = require('node:os')
 const path = require('path');
 const systemFile = path.join(os.tmpdir(), '/system.log')
 
-console.log('The temp dir is: ', os.tmpdir())
+// console.log('The temp dir is: ', os.tmpdir())
 module.exports.systemLog = (event, options = {}) => {
     if (typeof options === 'string') {
         options = { message: options };

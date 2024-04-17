@@ -6,7 +6,7 @@ const passport = require('passport');
 const handleError = require('../js/handleError');
 const { systemLog } = require('../js/logHandler');
 const { cors, corsWithOptions } = require('./corsModule');
-const cacheHandler = require('../js/cacheHandler');
+const cacheHandler = require('../js/redisClient');
 
 const rejectUser = (res) => {
     res.statusCode = 403
@@ -30,12 +30,12 @@ testingRouter.route('/dbconnectionstatus')
 
 testingRouter.route('/writeCache')
     .options(corsWithOptions, (req, res) => res.sendStatus(200))
-    .get(cors, authenticate.verifyUser,
+    .get(cors,
         async (req, res) => {
-            if (!req.user.admin) {
-                rejectUser();
-                return;
-            }
+            // if (!req.user.admin) {
+            //     rejectUser();
+            //     return;
+            // }
             cacheHandler.writeCache('MyEntry', 'MyData!!')
             const result = { test: 'success' }
             res.statusCode = 200

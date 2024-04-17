@@ -4,8 +4,10 @@ const NewsAPI = require('newsapi');
 const newsapi = new NewsAPI(apiKey);
 
 // const { systemLog } = require('../logs/logHandler');
-const { writeCache, checkCache, saveCache } = require('./cacheHandler');
+const { writeCache, checkCache, setLimit,checkLimit } = require('./redisClient');
 const { buildNewsURL } = require('./utils');
+const handleError = require('./handleError');
+const { ERROR_NEWS } = require('./DEFAULTS')
 
 //Handles calls to the news API
 module.exports.results = async (searchRequest) => {
@@ -16,19 +18,34 @@ module.exports.results = async (searchRequest) => {
   const cachedResult = await checkCache(searchText);
 
   if (!cachedResult) {
+    const timeLeft = await checkLimit();
+    if(timeLeft!=='none'){
+      throw 'Time left till requests can be made: ' + timeLeft + 'ms'
+    }
     console.log('Requesting from server...')
     //There are only 2 endpoints for the NewsAPI. Each takes an object with search properties.
     //See notes below
-    if (searchRequest.endpoint === 'top-headlines') {
-      myResults = await newsapi.v2.topHeadlines({ ...buildRequestObj(searchRequest) });
+    try {
+      if (searchRequest.endpoint === 'top-headlines') {
+        myResults = await newsapi.v2.topHeadlines({ ...buildRequestObj(searchRequest) });
 
-    } else if (searchRequest.endpoint === 'everything') {
-      myResults = await newsapi.v2.everything({ ...buildRequestObj(searchRequest) });
+      } else if (searchRequest.endpoint === 'everything') {
+        myResults = await newsapi.v2.everything({ ...buildRequestObj(searchRequest) });
 
-    };
-    console.log('Request complete\n**Writing to cache**\nkey: ' + searchText)
-    writeCache(searchText, myResults);
-    saveCache();
+      };
+      console.log('Request complete\n**Writing to cache**\nkey: ' + searchText)
+      writeCache(searchText, myResults);
+
+    } catch (err) {
+      if (err.name==='NewsAPIError: rateLimited'){
+        await setLimit()
+        console.log('Feed Limit reached')
+      }else{
+        handleError(err, 'newsAPI/results');
+      }
+
+      myResults = ERROR_NEWS
+    }
   } else {
     console.log('**Loading from cache**\nkey: ' + searchText)
     myResults = cachedResult
