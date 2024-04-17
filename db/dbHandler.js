@@ -10,12 +10,12 @@ const { systemLog } = require('../js/logHandler');
 const { sleep } = require('../js/utils');
 
 //Event handlers:
-mongoose.connection.on('connected', () => systemLog('--Mongo DB Connected--', { consoleShow: true }));
-mongoose.connection.on('open', () => systemLog('--Mongo DB Connection *Open*--', { consoleShow: true }));
-mongoose.connection.on('disconnected', () => systemLog('xx Mongo DB Disconnected xx', { consoleShow: true }));
-mongoose.connection.on('reconnected', () => systemLog('--Mongo DB reconnected--', { consoleShow: true }));
-mongoose.connection.on('disconnecting', () => systemLog('>>Disconnecting from DB<<', { consoleShow: true }));
-mongoose.connection.on('close', () => systemLog('xx Mongo DB Connection *Closed* xx', { consoleShow: true }));
+mongoose.connection.on('connected', () => systemLog('--Mongo DB Connected--', { consoleShow: false }));
+mongoose.connection.on('open', () => systemLog('--Mongo DB Connection *Open*--', { consoleShow: false }));
+mongoose.connection.on('disconnected', () => systemLog('xx Mongo DB Disconnected xx', { consoleShow: false }));
+mongoose.connection.on('reconnected', () => systemLog('--Mongo DB reconnected--', { consoleShow: false }));
+mongoose.connection.on('disconnecting', () => systemLog('>>Disconnecting from DB<<', { consoleShow: false }));
+mongoose.connection.on('close', () => systemLog('xx Mongo DB Connection *Closed* xx', { consoleShow: false }));
 
 
 
