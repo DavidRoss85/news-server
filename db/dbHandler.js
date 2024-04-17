@@ -1,4 +1,5 @@
-const url = process.env.MONGO_SERVER_URL //'mongodb://127.0.0.1:27017/newsFeedData';
+// const url = process.env.MONGO_SERVER_URL //'mongodb://127.0.0.1:27017/newsFeedData';
+const url = 'mongodb://127.0.0.1:27017/newsFeedData';
 const mongoose = require('mongoose');
 const passport = require('passport');
 const authenticate = require('../authenticate')
@@ -22,7 +23,7 @@ mongoose.connection.on('close', () => systemLog('xx Mongo DB Connection *Closed*
 
 //connect db:
 exports.connectToDatabase = async () => {
-    systemLog(`Attempting to connect to database`, { consoleShow: true });
+    // systemLog(`Attempting to connect to database`, { consoleShow: true });
     let result = {};
     try {
         if (mongoose.connection.readyState === 0) { //0 = not connected
@@ -37,7 +38,7 @@ exports.connectToDatabase = async () => {
         } else { // 1 (connected) or 2 (connecting)
             result = { result: 'connected', details: `Already connected to database` }
         }
-        systemLog(result.details, { consoleShow: true });
+        // systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, 'dbHandler/connectToDatabase');
 
@@ -53,7 +54,7 @@ exports.disconnectFromDatabase = async () => {
     try {
         await mongoose.connection.close();
         result = { result: 'disconnected', details: `Disconnected from database at ${url}` };
-        systemLog(result.details, { consoleShow: true });
+        // systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, 'dbHandler/disconnectFromDatabase');
     } finally {
@@ -121,7 +122,7 @@ exports.deleteUser = async (userInfo, options = {}) => {
         result = handleError(err, 'dbHandler/deleteUser');
     } finally {
         const allUsers = await User.find();
-        systemLog(`${allUsers.length} users left in database`, { consoleShow: true });
+        // systemLog(`${allUsers.length} users left in database`, { consoleShow: true });
         return result;
     };
 };
@@ -234,7 +235,7 @@ exports.getSettings = async (userInfo) => {
         const res = await UserSetting.findOne({ userId: _id });
         if (res) {
             result = { result: 'success', code: 200, category: 'Settings', message: 'Settings retrieved', data: res, details: res._id + ' settings retrieved' }
-            systemLog(result.details, { consoleShow: true });
+            // systemLog(result.details, { consoleShow: true });
         } else {
             result = handleError('UserSettingsDoesntExistsError', 'dbHandler/getSettings')
         };

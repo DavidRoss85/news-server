@@ -7,7 +7,7 @@ const handleError = require('../js/handleError');
 const { systemLog } = require('../logs/logHandler');
 const { cors, corsWithOptions } = require('./corsModule');
 
-const CONSOLE_SHOW = { consoleShow: true }
+const CONSOLE_SHOW = { consoleShow: false }
 
 //New User:
 userRouter.route('/signup')
@@ -77,7 +77,7 @@ userRouter.route('/settings')
         })
     .put(corsWithOptions, authenticate.verifyUser,
         async (req, res) => {
-            systemLog('Received a put request at /settings', { message: req.body, ...CONSOLE_SHOW })
+            // systemLog('Received a put request at /settings', { message: req.body, ...CONSOLE_SHOW })
             if (req.user.admin === true) {
                 //Do admin only process:
             }

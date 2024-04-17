@@ -3,14 +3,14 @@ const apiKey = process.env.API_KEY
 const NewsAPI = require('newsapi');
 const newsapi = new NewsAPI(apiKey);
 
-const { systemLog } = require('../logs/logHandler');
-const { writeCache, checkCache } = require('./cacheHandler');
+// const { systemLog } = require('../logs/logHandler');
+const { writeCache, checkCache, saveCache } = require('./cacheHandler');
 const { buildNewsURL } = require('./utils');
 
 //Handles calls to the news API
 module.exports.results = async (searchRequest) => {
 
-  systemLog(`News request received: ${searchRequest}`);
+  // systemLog(`News request received: ${searchRequest}`);
   let myResults = { "empty": "results" };
   const searchText = buildNewsURL(searchRequest);
   const cachedResult = await checkCache(searchText);
@@ -28,7 +28,7 @@ module.exports.results = async (searchRequest) => {
     };
     console.log('**Writing to cache**\nkey: '+ searchText)
     writeCache(searchText, myResults);
-
+    saveCache();
   } else {
     console.log('Loading from cache: ')
     myResults = cachedResult

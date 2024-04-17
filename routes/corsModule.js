@@ -10,11 +10,11 @@ const whitelist = [ localHost,serverLocation, clientLocation];
 
 const corsOptionsDelegate = (req, cb) => {
     let corsOptions;
-    systemLog('Request from: ' + req.header('Origin'));
     if (whitelist.indexOf(req.header('Origin')) !== -1) {
         corsOptions = { origin: true };
     } else {
         corsOptions = { origin: false };
+        systemLog('Outside Request from: ' + req.header('Origin'));
     }
     cb(null, corsOptions);
 };
