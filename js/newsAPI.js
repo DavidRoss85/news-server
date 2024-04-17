@@ -16,7 +16,7 @@ module.exports.results = async (searchRequest) => {
   const cachedResult = await checkCache(searchText);
 
   if (!cachedResult) {
-    console.log('\nNothing in Cache\n')
+    console.log('Requesting from server...')
     //There are only 2 endpoints for the NewsAPI. Each takes an object with search properties.
     //See notes below
     if (searchRequest.endpoint === 'top-headlines') {
@@ -26,11 +26,11 @@ module.exports.results = async (searchRequest) => {
       myResults = await newsapi.v2.everything({ ...buildRequestObj(searchRequest) });
 
     };
-    console.log('**Writing to cache**\nkey: '+ searchText)
+    console.log('**Writing to cache**\nkey: ' + searchText)
     writeCache(searchText, myResults);
     saveCache();
   } else {
-    console.log('Loading from cache: ')
+    console.log('**Loading from cache**\nkey: ' + searchText)
     myResults = cachedResult
   }
 

@@ -63,6 +63,6 @@ module.exports.importCache = async (saveOld = false) => {
     console.log('\nImported news cache:')
     // const dummyData = '{"Fake":{"value":"JSON Data", "expire":1713324245290}}'
     await cache.importJson(importedData);
-    console.log('Whats in the cache:', cache.exportJson())
+    // console.log('Whats in the cache:', cache.exportJson())
 
 };

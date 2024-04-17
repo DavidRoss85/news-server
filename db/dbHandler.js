@@ -78,7 +78,7 @@ exports.createNewUser = async (userInfo) => {
     try {
         const lowerCaseUsername = username.toLowerCase()
         const user = await User.register(new User({ username: lowerCaseUsername, email, displayname, notes }), password)
-        result = { result: 'success', code: 200, category: 'Register', message: 'Registration Successful for ' + user.username, details: 'Successfully registered user ' + user.username };
+        result = { result: 'success', code: 200, category: 'Register', message: 'Registration Successful for ' + user.username, details: 'Successfully registered user (' + user.username +')' };
         systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, 'dbHandler/createNewUser');
@@ -112,7 +112,7 @@ exports.deleteUser = async (userInfo, options = {}) => {
     try {
         const res = await User.findOneAndDelete(searchObj);
         if (res) {
-            result = { result: 'success', code: 200, category: 'Delete', message: 'User ' + res.username + ' deleted', details: res.username + ' deleted' };
+            result = { result: 'success', code: 200, category: 'Delete', message: 'User ' + res.username + ' deleted', details: 'User ('+ res.username + ') deleted' };
             systemLog(result.details, { consoleShow: true });
         } else {
             result = handleError('UserDoesntExistsError', 'dbHandler/deleteUser');
@@ -187,7 +187,7 @@ exports.updateSettings = async (settingsInfo) => {
     try {
         const res = await UserSetting.findOneAndUpdate({ userId: _id }, rest, { new: true });
         result = res ?
-            { result: 'success', code: 200, category: 'Settings', message: 'Settings updated', data: res, details: res._id + ' settings updated' }
+            { result: 'success', code: 200, category: 'Settings', message: 'Settings updated', data: res, details:'Settings updated for User '+ res._id  }
             :
             this.createNewSettings(settingsInfo);
         systemLog(result.details, { consoleShow: true });
@@ -207,7 +207,7 @@ exports.deleteSettings = async (settingsInfo) => {
     try {
         const res = await UserSetting.findOneAndDelete({ userId: _id });
         if (res) {
-            result = { result: 'success', code: 200, category: 'Settings', message: 'Settings deleted ', details: _id + ' settings deleted' };
+            result = { result: 'success', code: 200, category: 'Settings', message: 'Settings deleted ', details:'Settings deleted for User '+ _id  };
             systemLog(result.details, { consoleShow: true });
         } else {
             result = handleError('UserDoesntExistsError', 'dbHandler/deleteSettings');

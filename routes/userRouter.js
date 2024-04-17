@@ -26,7 +26,7 @@ userRouter.route('/signup')
 userRouter.route('/login')
     .options(corsWithOptions, (req, res) => res.sendStatus(200))
     .post(corsWithOptions, (req, res, next) => {
-        systemLog('Received post at /login', { message: req.body.username, ...CONSOLE_SHOW });
+        systemLog('Request to /login', { message:'User: '+ req.body.username, ...CONSOLE_SHOW });
         req.body.username = req.body.username.toLowerCase();
         passport.authenticate('local', (err, user, info) => {
             systemLog('Attempting to authenticate login', { message: '', ...CONSOLE_SHOW });
@@ -47,7 +47,7 @@ userRouter.route('/login')
                 return;
             }
             if (user) {
-                systemLog('Login success', { message: user.username, ...CONSOLE_SHOW });
+                systemLog('Successfully logged in', { message:'User: ' + user.username, ...CONSOLE_SHOW });
                 const token = authenticate.getToken({ _id: user._id });
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
