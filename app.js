@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const passport = require('passport');
 const dbHandler = require('./db/dbHandler');
-const { systemLog } = require('./logs/logHandler')
+const { systemLog } = require('./js/logHandler')
 const { sleep } = require('./js/utils');
 const { importCache } = require('./js/cacheHandler');
 

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const logHandler = require('../logs/logHandler');
+const logHandler = require('./logHandler');
 
 const handleError = (err, moduleName, options = {}) => {
     if (typeof err === 'string') {

@@ -4,7 +4,7 @@ const dbHandler = require('../db/dbHandler');
 const authenticate = require('../authenticate');
 const passport = require('passport');
 const handleError = require('../js/handleError');
-const { systemLog } = require('../logs/logHandler');
+const { systemLog } = require('../js/logHandler');
 const { cors, corsWithOptions } = require('./corsModule');
 const cacheHandler = require('../js/cacheHandler');
 

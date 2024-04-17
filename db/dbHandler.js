@@ -6,7 +6,7 @@ const authenticate = require('../authenticate')
 const User = require('./models/userModel');
 const UserSetting = require('./models/userSettingModel');
 const handleError = require('../js/handleError');
-const { systemLog } = require('../logs/logHandler');
+const { systemLog } = require('../js/logHandler');
 const { sleep } = require('../js/utils');
 
 //Event handlers:

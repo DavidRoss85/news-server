@@ -3,6 +3,7 @@ node_modules
 docs
 mongodb
 archive
+tmp
 logs/system.log
 bin/server.cert
 bin/server.key

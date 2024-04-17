@@ -1,8 +1,10 @@
 const { now } = require('mongoose');
 const fs = require('node:fs');
+const os = require('node:os')
 const path = require('path');
-const systemFile = path.join(__dirname, 'system.log')
+const systemFile = path.join(os.tmpdir(), '/system.log')
 
+console.log('The temp dir is: ', os.tmpdir())
 module.exports.systemLog = (event, options = {}) => {
     if (typeof options === 'string') {
         options = { message: options };

@@ -20,6 +20,7 @@ docs
 mongodb
 archive
 logs/system.log
+tmp
 bin/server.cert
 bin/server.key
 config.js

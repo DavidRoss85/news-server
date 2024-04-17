@@ -1,9 +1,11 @@
 const cache = require('memory-cache');
 // const { buildNewsURL } = require('./utils')
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('path');
-const cacheStore = path.join(__dirname, '../cache/newsCache.json');
-const cacheLog = path.join(__dirname, '../cache/newsCacheArchive.txt');
+const handleError = require('./handleError');
+const cacheStore = path.join(os.tmpdir(), '/newsCache.json');
+const cacheLog = path.join(os.tmpdir(), '/newsCacheArchive.txt');
 
 module.exports.checkCache = async (key) => {
     const cacheItem = await cache.get(key);
@@ -48,21 +50,36 @@ module.exports.saveCache = async () => {
 
 //Import old cache from file in case of server restart
 module.exports.importCache = async (saveOld = false) => {
-    const importedData = fs.readFileSync(cacheStore, 'utf-8');
 
-    // saveOld = true;
-    //Save the old cache in an archive file
-    if (saveOld) {
-        const appendLog = '\n\n>\n>\nDate/Time: ' + Date.now() + '\n\n' + importedData + '\n';
-        fs.appendFile(cacheLog, appendLog, err => {
-            if (err) {
-                console.log('Error saving old cache: ', err)
-            }
-        })
+    try {
+        const importedData = fs.readFileSync(cacheStore, 'utf-8');
+
+        // saveOld = true;
+        //Save the old cache in an archive file
+        if (saveOld) {
+            const appendLog = '\n\n>\n>\nDate/Time: ' + Date.now() + '\n\n' + importedData + '\n';
+            fs.appendFile(cacheLog, appendLog, err => {
+                if (err) {
+                    console.log('Error saving old cache: ', err)
+                }
+            })
+        }
+        console.log('\nImported news cache:')
+        // const dummyData = '{"Fake":{"value":"JSON Data", "expire":1713324245290}}'
+        await cache.importJson(importedData);
+        // console.log('Whats in the cache:', cache.exportJson())
+
+    } catch (err) {
+        if (err.errno === -4058 && err.code === 'ENOENT') {
+            //File does not exist:
+            fs.writeFile(cacheLog, '{}', err => {
+                if (err) {
+                    handleError(err, 'cacheHandler/importCache');
+                };
+            });
+        } else {
+            handleError(err, 'cacheHandler/importCache');
+        }
     }
-    console.log('\nImported news cache:')
-    // const dummyData = '{"Fake":{"value":"JSON Data", "expire":1713324245290}}'
-    await cache.importJson(importedData);
-    // console.log('Whats in the cache:', cache.exportJson())
-
 };
+

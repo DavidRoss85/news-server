@@ -1,4 +1,4 @@
-const { systemLog } = require('../logs/logHandler');
+const { systemLog } = require('../js/logHandler');
 const cors = require('cors');
 const localHost = process.env.LOCAL_HOST_URL;
 const localHostSecure = process.env.LOCAL_HOST_SECURE;
