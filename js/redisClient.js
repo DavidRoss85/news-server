@@ -15,8 +15,13 @@ const client = createClient({
 client.on('error', (err) => { handleError(err, 'redisClient') });
 
 module.exports.connectToCache = async () => {
-    await client.connect();
-    console.log('Connected to Redis host');
+    try{
+        await client.connect();
+        console.log('Connected to Redis host');
+    }catch(err){
+        handleError(err,'redisClient/connectToCache');
+        console.log('Failed to connect to Redis host...')
+    }
 }
 
 module.exports.checkCache = async (key) => {
