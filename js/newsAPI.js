@@ -26,7 +26,7 @@ module.exports.results = async (searchRequest) => {
       myResults = await newsapi.v2.everything({ ...buildRequestObj(searchRequest) });
 
     };
-    console.log('**Writing to cache**\nkey: ' + searchText)
+    console.log('Request complete\n**Writing to cache**\nkey: ' + searchText)
     writeCache(searchText, myResults);
     saveCache();
   } else {

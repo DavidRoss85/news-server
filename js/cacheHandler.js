@@ -72,10 +72,12 @@ module.exports.importCache = async (saveOld = false) => {
     } catch (err) {
         if (err.code === 'ENOENT') {
             //File does not exist:
+            console.log('No cache file found. Creating new file...')
             fs.writeFile(cacheLog, '{}', err => {
                 if (err) {
                     handleError(err, 'cacheHandler/importCache');
                 };
+                console.log('Cache file created: ', cacheLog)
             });
         } else {
             handleError(err, 'cacheHandler/importCache');
