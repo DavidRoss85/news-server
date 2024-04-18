@@ -1,7 +1,7 @@
 module.exports.TOKEN_TTL = 86400000; // ONE DAY
 module.exports.ONE_DAY = 86400000;
 module.exports.LOG_PATH = '';
-module.exports.CACHE_BAN_TIME = 'BANNED_TIME';
+module.exports.CACHE_ON = false;
 module.exports.ERROR_NEWS = {
     "status": "error",
     "message": "error",
