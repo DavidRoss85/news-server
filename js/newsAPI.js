@@ -84,6 +84,7 @@ module.exports.results = async (searchRequest) => {
 };
 
 
+//LEFT OFF HERE!!
 
 const fetchFromServer = async (searchRequest) => {
 	const thisFunction = {
