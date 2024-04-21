@@ -84,6 +84,16 @@ const handleError = (err, moduleName, options = {}) => {
             server.category = 'Login Error';
             server.message = 'Incorrect Password';
             break;
+        case 'EntryDoesntExistError':
+            server.code = 401;
+            server.category = 'Cache Error';
+            server.message = 'No Cache Entry Found';
+            break;
+        case 'CacheEntryExistsError':
+            server.code = 401;
+            server.category = 'Cache Error';
+            server.message = 'Cache entry for that key already exists';
+            break;
         case mongoose.Error.MongooseServerSelectionError.name || 'MongoServerSelectionError':
             server.message = 'Could not connect to the server database';
             break;

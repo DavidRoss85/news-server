@@ -1,5 +1,5 @@
-const url = process.env.MONGO_SERVER_URL //'mongodb://127.0.0.1:27017/newsFeedData';
-// const url = 'mongodb://127.0.0.1:27017/newsFeedData';
+// const url = process.env.MONGO_SERVER_URL //'mongodb://127.0.0.1:27017/newsFeedData';
+const url = 'mongodb://127.0.0.1:27017/newsFeedData';
 const mongoose = require('mongoose');
 const passport = require('passport');
 const authenticate = require('../authenticate')
@@ -8,6 +8,7 @@ const UserSetting = require('./models/userSettingModel');
 const handleError = require('../js/handleError');
 const { systemLog } = require('../js/logHandler');
 const { sleep } = require('../js/utils');
+const NewsCacheEntry = require('./models/cacheModel');
 
 //Event handlers:
 mongoose.connection.on('connected', () => systemLog('--Mongo DB Connected--', { consoleShow: false }));
@@ -62,6 +63,24 @@ exports.disconnectFromDatabase = async () => {
     };
 };
 
+
+//get db Status
+exports.getMongoStatus = async () => {
+    return { connectionStatus: mongoose.connection.readyState }
+};
+
+//ensure db is connected/attempt reconnect
+const ensureConnection = async () => {
+    try {
+        if (mongoose.connection.readyState === 0) { //0 = not connected
+            await this.connectToDatabase()
+        }
+    } catch (err) {
+        result = handleError(err, 'dbHandler/connectToDatabase');
+
+    };
+};
+
 //-----------------
 //User handlers
 //-----------------
@@ -78,7 +97,7 @@ exports.createNewUser = async (userInfo) => {
     try {
         const lowerCaseUsername = username.toLowerCase()
         const user = await User.register(new User({ username: lowerCaseUsername, email, displayname, notes }), password)
-        result = { result: 'success', code: 200, category: 'Register', message: 'Registration Successful for ' + user.username, details: 'Successfully registered user (' + user.username +')' };
+        result = { result: 'success', code: 200, category: 'Register', message: 'Registration Successful for ' + user.username, details: 'Successfully registered user (' + user.username + ')' };
         systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, 'dbHandler/createNewUser');
@@ -112,7 +131,7 @@ exports.deleteUser = async (userInfo, options = {}) => {
     try {
         const res = await User.findOneAndDelete(searchObj);
         if (res) {
-            result = { result: 'success', code: 200, category: 'Delete', message: 'User ' + res.username + ' deleted', details: 'User ('+ res.username + ') deleted' };
+            result = { result: 'success', code: 200, category: 'Delete', message: 'User ' + res.username + ' deleted', details: 'User (' + res.username + ') deleted' };
             systemLog(result.details, { consoleShow: true });
         } else {
             result = handleError('UserDoesntExistsError', 'dbHandler/deleteUser');
@@ -187,7 +206,7 @@ exports.updateSettings = async (settingsInfo) => {
     try {
         const res = await UserSetting.findOneAndUpdate({ userId: _id }, rest, { new: true });
         result = res ?
-            { result: 'success', code: 200, category: 'Settings', message: 'Settings updated', data: res, details:'Settings updated for User '+ res._id  }
+            { result: 'success', code: 200, category: 'Settings', message: 'Settings updated', data: res, details: 'Settings updated for User ' + res._id }
             :
             this.createNewSettings(settingsInfo);
         systemLog(result.details, { consoleShow: true });
@@ -207,7 +226,7 @@ exports.deleteSettings = async (settingsInfo) => {
     try {
         const res = await UserSetting.findOneAndDelete({ userId: _id });
         if (res) {
-            result = { result: 'success', code: 200, category: 'Settings', message: 'Settings deleted ', details:'Settings deleted for User '+ _id  };
+            result = { result: 'success', code: 200, category: 'Settings', message: 'Settings deleted ', details: 'Settings deleted for User ' + _id };
             systemLog(result.details, { consoleShow: true });
         } else {
             result = handleError('UserDoesntExistsError', 'dbHandler/deleteSettings');
@@ -249,17 +268,120 @@ exports.getSettings = async (userInfo) => {
 
 };
 
-exports.getMongoStatus = async ()=>{
-    return {connectionStatus: mongoose.connection.readyState}
-}
+//-----------------
+//Cache handlers
+//-----------------
 
-const ensureConnection = async () => {
-    try {
-        if (mongoose.connection.readyState === 0) { //0 = not connected
-            await this.connectToDatabase()
-        }
-    } catch (err) {
-        result = handleError(err, 'dbHandler/connectToDatabase');
-
+//Add settings
+exports.createNewsCacheEntry = async (key, data) => {
+    const thisFunction = {
+        parent: 'dbHandler',
+        name: 'createNewsCacheEntry',
     };
+
+    if (!key || !data) return handleError('InvalidDataError', `${thisFunction.parent}/${thisFunction.name}`);
+
+    let result = {};
+    await ensureConnection();
+    try {
+        const cacheInfo = await NewsCacheEntry.findOne({ key })
+        if (!cacheInfo) {
+            const res = await NewsCacheEntry.create({ key, data });
+            result = { result: 'success', code: 200, category: 'News Cache', message: 'New cache entry created ', data: res, details: 'created new cache entry for ' + key };
+            systemLog(result.details, { consoleShow: true });
+        } else {
+            result = handleError('CacheEntryExistsError', `${thisFunction.parent}/${thisFunction.name}`);
+        }
+
+    } catch (err) {
+        result = handleError(err, `${thisFunction.parent}/${thisFunction.name}`);
+
+    } finally {
+        return result;
+    };
+};
+
+//Update Cache:
+exports.updateNewsCacheEntry = async (key, data) => {
+    const thisFunction = {
+        parent: 'dbHandler',
+        name: 'updateNewsCacheEntry',
+    };
+
+    if (!key || !data) return handleError('InvalidDataError', `${thisFunction.parent}/${thisFunction.name}`);
+    let result = {};
+    await ensureConnection();
+    try {
+        const res = await NewsCacheEntry.findOneAndUpdate({ key }, data, { new: true });
+        result = res ?
+            { result: 'success', code: 200, category: 'News Cache', message: 'Cache updated', data: res, details: 'Cache updated for key: ' + res.key }
+            :
+            this.createNewsCacheEntry(key, data);
+        systemLog(result.details, { consoleShow: true });
+    } catch (err) {
+        result = handleError(err, `${thisFunction.parent}/${thisFunction.name}`);
+
+    } finally {
+        return result;
+    };
+
+};
+
+//Delete Cache Entry
+exports.deleteNewsCacheEntry = async (key) => {
+    const thisFunction = {
+        parent: 'dbHandler',
+        name: 'deleteNewsCacheEntry',
+    };
+
+    if (!key) return handleError('InvalidDataError', `${thisFunction.parent}/${thisFunction.name}`);
+    let result = {};
+    try {
+        const res = await NewsCacheEntry.findOneAndDelete({ key });
+        if (res) {
+            result = { result: 'success', code: 200, category: 'News Cache', message: 'Cache entry deleted ', details: 'Cache Entry deleted for key: ' + key };
+            systemLog(result.details, { consoleShow: true });
+        } else {
+            result = handleError('EntryDoesntExistError', `${thisFunction.parent}/${thisFunction.name}`);
+
+        };
+
+
+    } catch (err) {
+        result = handleError(err, `${thisFunction.parent}/${thisFunction.name}`);
+
+    } finally {
+        const allEntries = await NewsCacheEntry.find();
+        systemLog(`${allUsers.length} news cache entries left in database`, { consoleShow: true });
+        return result;
+    };
+
+};
+
+//Get News Cache Entry:
+exports.getNewsCacheEntry = async (key) => {
+    const thisFunction = {
+        parent: 'dbHandler',
+        name: 'getNewsCacheEntry',
+    };
+
+    if (!key) return handleError('InvalidDataError', `${thisFunction.parent}/${thisFunction.name}`);
+    let result = {};
+    await ensureConnection();
+    try {
+        const res = await NewsCacheEntry.findOne({ key });
+        if (res) {
+            result = { result: 'success', code: 200, category: 'News Cache', message: 'Cache Entry retrieved', data: res, details: res.key + ' cache retrieved' }
+            // systemLog(result.details, { consoleShow: true });
+        } else {
+            result = handleError('EntryDoesntExistError', `${thisFunction.parent}/${thisFunction.name}`)
+        };
+
+    } catch (err) {
+        result = handleError(err, `${thisFunction.parent}/${thisFunction.name}`);
+
+    } finally {
+        return result;
+    };
+
 };
