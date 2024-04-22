@@ -5,10 +5,10 @@ const newsapi = new NewsAPI(apiKey);
 
 // const { systemLog } = require('../logs/logHandler');
 // const { writeCache, checkCache, setLimit, checkLimit } = require('./redisClient');
-const { createNewsCacheEntry, updateNewsCacheEntry, deleteNewsCacheEntry, getNewsCacheEntry } = require('../db/dbHandler')
+const { updateNewsCacheEntry, getNewsCacheEntry } = require('../db/dbHandler')
 const { buildNewsURL } = require('./utils');
 const handleError = require('./handleError');
-const { ERROR_NEWS } = require('./DEFAULTS')
+const { ERROR_NEWS, CACHE_TTL } = require('./DEFAULTS')
 const LIMIT_MESSAGE = 'Server limit reached. Please come back in 24hrs...'
 const BAN_KEY = 'BANNED_TIME';
 const { ONE_DAY, CACHE_ON } = require('./DEFAULTS');
@@ -23,70 +23,32 @@ module.exports.results = async (searchRequest) => {
 	//Check Cache
 	const cachedResult = await getNewsCacheEntry(searchText);
 
-	//If no match for the search criteria in cache:
+	//If no match for the search criteria in cache fetch from server:
 	if (!cachedResult || cachedResult.result === 'error') {
-		// //Get query restriction information:
-		// const lastCacheBanEntry = await getNewsCacheEntry(BAN_KEY);
-		// console.log('\n\n*******************\n****CACHE BAN: ', lastCacheBanEntry);
+		myResults = await fetchFromServer(searchRequest, searchText);
 
-		// let timePassed = ONE_DAY;//-100000;
-		// //If restriction found:
-		// if (lastCacheBanEntry.result === 'success') {
-		//   //Calculate time passed since ban (Needs to be greater than 24hrs)
-		//   timePassed = Date.now() - lastCacheBanEntry.data.data;
-		//   timePassed = isNaN(timePassed) ? ONE_DAY : timePassed;
-		// }
-
-		// //If request limit reached:
-		// if (timePassed < ONE_DAY) {
-		//   myResults = { ...ERROR_NEWS, message: LIMIT_MESSAGE };
-		//   console.log('Time left till requests can be made: ' + ((ONE_DAY - timePassed) / 3600000) + 'hours');
-		//   return myResults;
-		// }
-
-
-		console.log('Requesting from server...')
-		//There are only 2 endpoints for the NewsAPI. Each takes an object with search properties.
-		//See notes below
-		try {
-			// myResults = await fetchFromServer(searchRequest);
-
-			console.log('Request complete\n**Writing to cache**\nkey: ' + searchText);
-			myResults = { ...ERROR_NEWS, message: 'Imitation news from server' }
-			updateNewsCacheEntry(searchText, myResults);
-
-		} catch (err) {
-
-			//If NewsAPI throws a 'Too many requests' error:
-			// if (err.name === 'NewsAPIError: rateLimited') {
-			// 	await updateNewsCacheEntry(BAN_KEY, Date.now())
-			// 	console.log('Feed Limit reached');
-			// 	//Use old results if they exist/otherwise send error to client:
-			// 	if (cachedResult.result === 'success') {
-			// 		myResults = cachedResult.data.data;
-			// 	} else {
-			// 		myResults = { ...ERROR_NEWS, message: LIMIT_MESSAGE }
-			// 	}
-			// } else {
-			// 	const errObj = handleError(err, 'newsAPI/results');
-			// 	myResults = { ...ERROR_NEWS, message: errObj.message };
-			// }
-
-
-		}
+		//If found in cache:
 	} else if (cachedResult.result === 'success') {
-		//Found in cache:
+
+		//check for expiry here and fetch news if expired
+		if (Date.now() - cachedResult.data.updatedAt > CACHE_TTL) {
+			myResults = await fetchFromServer(searchRequest, searchText);
+			if (myResults.status !== 'error') {
+				return myResults;
+			}
+		};
+
+		//If the fetch fails or returns an error, default to expired cache entry:
 		console.log('**Loading from cache**\nkey: ' + searchText)
-		myResults = cachedResult.data.data
-	}
+		myResults = { ...cachedResult.data.data, message: "Loaded from cache" }
+	};
 
 	return myResults;
 };
 
 
-//LEFT OFF HERE!!
-
-const fetchFromServer = async (searchRequest) => {
+//Returns {status: 'ok'} or {staus: 'error'} depending on success
+const fetchFromServer = async (searchRequest, searchText) => {
 	const thisFunction = {
 		parent: 'newsAPI',
 		name: 'fetchFromServer',
@@ -111,24 +73,27 @@ const fetchFromServer = async (searchRequest) => {
 	}
 
 	//Last ban was > 24hrs ago... send fetch request to News API:
+	console.log('Requesting from server...')
 	try {
+		const newsEndpoint = searchRequest.endpoint === 'top-headlines' ? 'topHeadlines' : 'everything';
+		const myResults = await newsapi.v2[newsEndpoint]({ ...buildRequestObj(searchRequest) });
 
-		// throw {name:'NewsAPIError: rateLimited',message:'Too many requests'};
-		if (searchRequest.endpoint === 'top-headlines') {
-			return await newsapi.v2.topHeadlines({ ...buildRequestObj(searchRequest) });
+		console.log('Request complete\n**Writing to cache**\nkey: ' + searchText);
+		updateNewsCacheEntry(searchText, myResults);
 
-		} else if (searchRequest.endpoint === 'everything') {
-			return await newsapi.v2.everything({ ...buildRequestObj(searchRequest) });
-
-		};
+		return myResults;
 
 	} catch (err) {
 		//Will update the ban timer if API returns rate limeted error.
-		let errMsg =''
+		let errMsg = ''
 		if (err.name === 'NewsAPIError: rateLimited') {
-			await updateNewsCacheEntry(BAN_KEY, Date.now())
-			console.log('Feed Limit reached');
-			errMsg = LIMIT_MESSAGE;
+			try {
+				await updateNewsCacheEntry(BAN_KEY, Date.now())
+				console.log('Feed Limit reached');
+				errMsg = LIMIT_MESSAGE;
+			} catch (err) {
+				handleError(err, `${thisFunction.parent}/${thisFunction.name}`);
+			}
 		} else {
 			const errObj = handleError(err, `${thisFunction.parent}/${thisFunction.name}`);
 			errMsg = errObj.message;

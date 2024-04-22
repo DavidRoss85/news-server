@@ -312,11 +312,12 @@ exports.updateNewsCacheEntry = async (key, data) => {
     let result = {};
     await ensureConnection();
     try {
-        const res = await NewsCacheEntry.findOneAndUpdate({ key }, data, { new: true });
+        const res = await NewsCacheEntry.findOneAndUpdate({ key }, { data: data }, { new: true, upsert: true });
         result = res ?
             { result: 'success', code: 200, category: 'News Cache', message: 'Cache updated', data: res, details: 'Cache updated for key: ' + res.key }
             :
-            this.createNewsCacheEntry(key, data);
+            { result: 'success', code: 200, category: 'News Cache', message: 'Cache updated', data: res, details: 'Cache updated for key: ' + res.key };
+        //this.createNewsCacheEntry(key, data);
         systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, `${thisFunction.parent}/${thisFunction.name}`);
