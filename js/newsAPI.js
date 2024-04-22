@@ -21,7 +21,7 @@ module.exports.results = async (searchRequest) => {
 	const searchText = buildNewsURL(searchRequest);
 
 	//Check Cache
-	const cachedResult = await getNewsCacheEntry(searchText);
+	const cachedResult = CACHE_ON ? await getNewsCacheEntry(searchText) : { result: 'error' };
 
 	//If no match for the search criteria in cache fetch from server:
 	if (!cachedResult || cachedResult.result === 'error') {
@@ -73,22 +73,24 @@ const fetchFromServer = async (searchRequest, searchText) => {
 	}
 
 	//Last ban was > 24hrs ago... send fetch request to News API:
-	console.log('Requesting from server...')
 	try {
+		console.log('Requesting from server...');
 		const newsEndpoint = searchRequest.endpoint === 'top-headlines' ? 'topHeadlines' : 'everything';
 		const myResults = await newsapi.v2[newsEndpoint]({ ...buildRequestObj(searchRequest) });
 
-		console.log('Request complete\n**Writing to cache**\nkey: ' + searchText);
-		updateNewsCacheEntry(searchText, myResults);
+		if (CACHE_ON) {
+			console.log('Request complete\n**Writing to cache**\nkey: ' + searchText);
+			updateNewsCacheEntry(searchText, myResults);
+		};
 
 		return myResults;
 
 	} catch (err) {
 		//Will update the ban timer if API returns rate limeted error.
-		let errMsg = ''
+		let errMsg = '';
 		if (err.name === 'NewsAPIError: rateLimited') {
 			try {
-				await updateNewsCacheEntry(BAN_KEY, Date.now())
+				await updateNewsCacheEntry(BAN_KEY, Date.now());
 				console.log('Feed Limit reached');
 				errMsg = LIMIT_MESSAGE;
 			} catch (err) {
