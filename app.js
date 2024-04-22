@@ -8,7 +8,6 @@ const passport = require('passport');
 const dbHandler = require('./db/dbHandler');
 const { systemLog } = require('./js/logHandler')
 const { sleep } = require('./js/utils');
-const { connectToCache } = require('./js/redisClient');
 
 const indexRouter = require('./routes/indexRouter');
 const newsRouter = require('./routes/newsRouter');
@@ -22,8 +21,6 @@ sleep(500) //wait half a second to begin
     systemLog('System start', 'OK!');
     systemLog('\n\n************\n************\nBEGIN SERVER\n************\n************', { consoleShow: true, logFile: false, lineBreak: '<none>' })
     dbHandler.connectToDatabase();
-    connectToCache();
-    // importCache(); //Automatically load last search cache from file
   });
 
 

@@ -311,12 +311,9 @@ exports.updateNewsCacheEntry = async (key, data) => {
     await ensureConnection();
     try {
         const res = await NewsCacheEntry.findOneAndUpdate({ key }, { data: data }, { new: true, upsert: true });
-        result = res ?
-            { result: 'success', code: 200, category: 'News Cache', message: 'Cache updated', data: res, details: 'Cache updated for key: ' + res.key }
-            :
-            { result: 'success', code: 200, category: 'News Cache', message: 'Cache updated', data: res, details: 'Cache updated for key: ' + res.key };
+        result = { result: 'success', code: 200, category: 'News Cache', message: 'Cache updated', data: res, details: 'Cache updated for key: ' + res.key };
         //this.createNewsCacheEntry(key, data);
-        systemLog(result.details, { consoleShow: true });
+        // systemLog(result.details, { consoleShow: true });
     } catch (err) {
         result = handleError(err, `${thisFunction.parent}/${thisFunction.name}`);
 
@@ -373,7 +370,11 @@ exports.getNewsCacheEntry = async (key) => {
             result = { result: 'success', code: 200, category: 'News Cache', message: 'Cache Entry retrieved', data: res, details: res.key + ' cache retrieved' }
             // systemLog(result.details, { consoleShow: true });
         } else {
-            result = handleError('EntryDoesntExistError', `${thisFunction.parent}/${thisFunction.name}`)
+            result = handleError(
+                'EntryDoesntExistError', 
+                `${thisFunction.parent}/${thisFunction.name}`,
+                {logfile:false,consoleShow:false},
+            );
         };
 
     } catch (err) {
